@@ -99,6 +99,7 @@ def train(opt):
             state = env.reset()
             if torch.cuda.is_available():
                 state = state.cuda()
+            # 확인
             epoch += 1
             print("Epoch: {}/{}, Action: {}, Score: {}, Tetrominoes {}, Cleared lines: {} loss : ".format(
                 epoch,
