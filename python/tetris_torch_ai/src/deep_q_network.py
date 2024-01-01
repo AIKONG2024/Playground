@@ -1,9 +1,21 @@
 """
 @author: Viet Nguyen <nhviet1009@gmail.com>
 """
+
+"""
+
+---GOAL
+
+📌코드분석
+📌tensorflow로 변환
+
+
+"""
+
+
+
+
 import torch.nn as nn
-
-
 class DeepQNetwork(nn.Module):
     def __init__(self):
         super(DeepQNetwork, self).__init__()

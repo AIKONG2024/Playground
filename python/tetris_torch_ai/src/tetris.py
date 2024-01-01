@@ -1,13 +1,23 @@
 """
 @author: Viet Nguyen <nhviet1009@gmail.com>
 """
+
+"""
+
+---GOAL
+
+📌코드 분석
+📌게임 분석
+
+"""
+
+
 import numpy as np
 from PIL import Image
 import cv2
 from matplotlib import style
 import torch
 import random
-
 style.use("ggplot")
 
 

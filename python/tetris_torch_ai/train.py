@@ -1,21 +1,33 @@
 """
 @author: Viet Nguyen <nhviet1009@gmail.com>
 """
+
+
+"""
+
+---GOAL
+
+📌코드분석
+📌가중치의 기준을 뭘로 정했는지 분석, 문서화 정리
+📌tensorflow로 변환
+
+
+"""
+
+
+
+
 import argparse
 import os
 import shutil
 from random import random, randint, sample
-
 import numpy as np
 import torch
 import torch.nn as nn
 from tensorboardX import SummaryWriter
-
 from src.deep_q_network import DeepQNetwork
 from src.tetris import Tetris
 from collections import deque
-
-
 def get_args():
     parser = argparse.ArgumentParser(
         """Implementation of Deep Q Network to play Tetris""")
