@@ -20,7 +20,7 @@ def first_func(w):
     
 word = "Goodboy"
 
-first_func(word)
+first_func(word) #Hello, Goodboy
     
     
 #예제2
@@ -29,8 +29,8 @@ def return_func(w1):
     value = "Hello, " + str(w1)
     return value
 
-x = return_func('Goodboy2')
-print(x)
+x = return_func('Goodboy2') 
+print(x) #Hello, Goodboy2
 
 
 #예제3(다중반환)
@@ -43,7 +43,7 @@ def func_mul(x):
 
 x, y, z = func_mul(10) #언팩킹
 
-print(x,y,z)
+print(x,y,z) #100, 200, 300
 
 
 #튜플 리턴
@@ -91,9 +91,9 @@ def args_func(*args): # 매개변수 명 자유
         print(f'Result : {i, v}')
     print('------')
     
-args_func('Lee')
-args_func('Lee', 'Park')
-args_func('Lee', 'Park', 'Kim')
+args_func('Lee') #Result : (0, 'Lee')
+args_func('Lee', 'Park')#Result : (0, 'Lee') Result : (1, 'Park')
+args_func('Lee', 'Park', 'Kim')#Result : (0, 'Lee') Result : (1, 'Park') Result : (2, 'Kim')
 
 # keyword arguments
 # **kwarg(언팩킹)
