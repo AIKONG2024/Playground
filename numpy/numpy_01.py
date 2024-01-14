@@ -116,12 +116,60 @@ print(arr2)
 #[start:end:step] end는 exclusive 불포함
 arange_2 = np.arange(10)
 print(arange_2) #[0 1 2 3 4 5 6 7 8 9]
-arange_2 = arange_2[0:8:1] 
-print(arange_2) #[0 1 2 3 4 5 6 7]
-arange_2 = arange_2[:5:1] 
-print(arange_2)# [0 1 2 3 4]
-arange_2 = arange_2[:4:]
-print(arange_2)# [0 1 2 3]
-arange_2 = arange_2[:2]
-print(arange_2)#[0 1]
+print(arange_2[0:8:1] ) #[0 1 2 3 4 5 6 7]
+print(arange_2[:5:1] )# [0 1 2 3 4]
+print(arange_2[:4:])# [0 1 2 3]
+print(arange_2[:2] )#[0 1] #모든게 생략 가능해도 end는 무조건 포함 되어야함.
+print(arange_2[:]) #[0 1 2 3 4 5 6 7 8 9]
+print(arange_2[::])#[0 1 2 3 4 5 6 7 8 9]
+print(arange_2[2:9:2]) #[2 4 6 8]
+print(arange_2[2::2]) # [2 4 6 8]
+print(arange_2[::-1])# 거꾸로 출력 [9 8 7 6 5 4 3 2 1 0]
+print(arange_2[-1:-11:-1])#[9 8 7 6 5 4 3 2 1 0] -1=9, -11=범위 밖이므로 0, -1 거꾸로 
+print(arange_2[5::-1]) #[5 4 3 2 1 0] 1.거꾸로를 기준으로 잡음. 시작값: 5 마지막값 : 0
+
+#형태변환
+arange_3 = np.arange(12)
+print(arange_3.reshape(-1,4)) #4개씩 잘라줌
+'''
+[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+'''
+arange_4 = np.arange(7)
+arange_5 = np.array((7,8,9,10))
+print(arange_4, arange_5) #[0 1 2 3 4 5 6] [ 7  8  9 10]
+#두 배열을 합침
+print(np.concatenate([arange_4, arange_5])) #[ 0  1  2  3  4  5  6  7  8  9 10]
+print(np.concatenate([arange_4, arange_5], axis=0)) #[ 0  1  2  3  4  5  6  7  8  9 10]
+
+arr_5 = np.array([[1,2,3],[4,5,6]])
+arr_6 = np.array([[1,2,3],[4,5,6]])
+print(np.concatenate([arr_5, arr_6], axis= 0))
+'''
+[[1 2 3]
+ [4 5 6]
+ [1 2 3]
+ [4 5 6]]
+ '''
+print(np.concatenate([arr_5, arr_6], axis= 1))
+'''
+[[1 2 3 1 2 3]
+ [4 5 6 4 5 6]]
+''' 
+
+print(np.vstack([arr_5, arr_6]))
+'''
+[[1 2 3]
+ [4 5 6]
+ [1 2 3]
+ [4 5 6]]
+'''
+print(np.hstack([arr_5, arr_6]))
+'''
+[[1 2 3 1 2 3]
+ [4 5 6 4 5 6]]
+'''
+
+
 
