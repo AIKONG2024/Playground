@@ -1,10 +1,7 @@
-from keras.models import Sequential
-from keras.layers import Dense
+# 적절한 모델을 찾아주는 Tuner 사용해보기 
 
 import numpy as np
 import pandas as pd
-from keras.models import Sequential
-from keras.layers import Dense
 from sklearn.model_selection import train_test_split
 
 #1. 데이터 - 경로데이터를 메모리에 땡겨옴
@@ -18,36 +15,31 @@ x = train_csv.drop(['count'], axis=1) #axis 0이 행 1이 열
 y = train_csv['count'] 
 x_train, x_test, y_train, y_test = train_test_split(x,y, shuffle=True, train_size=0.8, random_state=12345)
 
-
-# #RandomSearch 로 찾는법
-
 from custom_hyper_model import LeanerRegressionModel
-from keras_tuner.tuners import Hyperband
-build_model = LeanerRegressionModel(num_classes= 10)   
-    
+build_model = LeanerRegressionModel(num_classes= 10, output_count=1)   
+from keras.callbacks import EarlyStopping
+es = [EarlyStopping(monitor='val_loss', mode='min', patience=100, restore_best_weights= True)]
+# =========RandomSearch 로 찾는법
 # from keras_tuner.tuners import RandomSearch
 # tuner = RandomSearch(
-#     bulid_model,
+#     build_model,
 #     objective='val_mae',
-#     max_trials= 10, #랜덤 100번
-#     executions_per_trial = 3,
-#     directory = '/Users/kongseon-eui/Documents/Workspace/AI_Project/_data/',
-#     project_name = 'keras_tuner_test'
-# )
+#     max_trials=100, # 이거는 랜덤으로 100번까지 찾는 방법
+#     executions_per_trial=3,
+#     directory='/Users/kongseon-eui/Documents/Workspace/AI_Project/_data/',
+#     project_name='Keras Tuner Test')
 
-# tuner.search(x_train, y_train, epochs=50, batch_size=200, validation_split=0.2)
 
+# tuner.search(x_train, y_train, epochs=300, batch_size=1000, validation_split=0.2, callbacks = [es])
 # tuner.search_space_summary()
 # tuner.results_summary()
 
 # #check results
-# model = tuner.get_best_hyperparameters(num_models = 1)[0]
+# model = tuner.get_best_models(num_models = 1)[0]
+# 
 
-
-#Hyperband로 찾는법
-    
-
-
+#============= Hyperband로 찾는법
+from keras_tuner.tuners import Hyperband
 tuner = Hyperband(build_model, objective='val_loss', max_epochs=1000, factor=10, 
                   directory = '/Users/kongseon-eui/Documents/Workspace/AI_Project/_data/', project_name = 'hyperband')
 tuner.search(x_train, y_train, epochs = 1000, validation_split = 0.2)
@@ -55,12 +47,9 @@ tuner.search(x_train, y_train, epochs = 1000, validation_split = 0.2)
 #get hyperparameters
 best_hps = tuner.get_best_hyperparameters(num_trials=3)[0]
 tuner.results_summary()
-
-from keras.callbacks import EarlyStopping
-#구성 훈련
 model = tuner.hypermodel.build(best_hps)
-es = [EarlyStopping(monitor='val_loss', mode='min', patience=1000, restore_best_weights= True)]
-history=model.fit(x_train, y_train, epochs =3000, batch_size = 100, validation_split = 0.2,  callbacks = [es])
+
+history=model.fit(x_train, y_train, epochs =300, batch_size = 1000, validation_split = 0.2,  callbacks = [es])
 loss = model.evaluate(x_test, y_test)
 print("loss : ", loss)
 submit = model.predict(test_csv)
