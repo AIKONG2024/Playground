@@ -22,12 +22,26 @@ train_csv = pd.read_csv(path + 'train.csv', index_col= 0)
 test_csv = pd.read_csv(path + 'test.csv', index_col= 0)
 submission_csv = pd.read_csv(path + 'sample_submission.csv')
 
+#전처리
+train_csv.drop(columns='fixed acidity', inplace=True)
+test_csv.drop(columns='fixed acidity', inplace=True)
+train_csv.drop(columns='alcohol', inplace=True)
+test_csv.drop(columns='alcohol', inplace=True)
+train_csv.drop(columns='density', inplace=True)
+test_csv.drop(columns='density', inplace=True)
+train_csv.drop(columns='free sulfur dioxide', inplace=True)
+test_csv.drop(columns='free sulfur dioxide', inplace=True)
+train_csv.drop(columns='residual sugar', inplace=True)
+test_csv.drop(columns='residual sugar', inplace=True)
+
 #글자 제거
 train_csv['type'] = train_csv['type'].replace({'white':1, 'red': 0})
 test_csv['type'] = test_csv['type'].replace({'white':1, 'red': 0})
 
+
 x = train_csv.drop(columns='quality')
 y = train_csv['quality']
+
 
 #one hot
 y = y.values.reshape((-1,1))
@@ -35,31 +49,12 @@ one_hot_y = OneHotEncoder(sparse=False).fit_transform(y)
 unique, count =  np.unique(one_hot_y, return_counts=True)
 print(one_hot_y)
 
-'''
-8                 |num_layers
-416               |96                |units_0
-relu              |relu              |activation
-368               |112               |units_1
-0.01              |0.01              |learning_rate
-176               |480               |units_2
-384               |160               |units_3
-96                |16                |units_4
-48                |272               |units_5
-48                |464               |units_6
-320               |224               |units_7
-336               |128               |units_8
-464               |496               |units_9
-2                 |2                 |tuner/epochs
-0                 |0                 |tuner/initial_epoch
-8                 |8                 |tuner/bracket
-0                 |0 
-'''
-x_train, x_test, y_train, y_test = train_test_split(x, one_hot_y, train_size=0.8, random_state=12345, stratify= one_hot_y)
+x_train, x_test, y_train, y_test = train_test_split(x, one_hot_y, train_size=0.85, random_state=123456, stratify= one_hot_y)
 
 #Hyper Model
 build_model = MulticlassClassificationModel(num_classes = 0, output_count = 7)
 tuner = Hyperband(build_model, objective='val_loss', max_epochs=500, factor=3,
-                  directory = path, project_name='hyperband', max_consecutive_failed_trials = 30, max_retries_per_trial = 30) 
+                  directory = path, project_name='hyperband', max_consecutive_failed_trials = 14, max_retries_per_trial = 14) 
 tuner.search(x_train, y_train, epochs = 500, batch_size = 1000, validation_split = 0.2, callbacks = [es])
 
 #get hyperparameters
