@@ -20,18 +20,10 @@ x_train, x_test, y_train, y_test = train_test_split(x,y, shuffle=True, train_siz
 
 
 # #RandomSearch 로 찾는법
-# def bulid_model(hp):
-#     model = Sequential()
-#     for i in range(hp.Int('num_layers', 2,5)): #layer를 2~5
-#         model.add(Dense(units=hp.Int('units_' + str(i),
-#                                      min_value = 16,
-#                                      max_value = 64,
-#                                      step = 16),
-#                                      activation='relu'))
-#         model.add(Dense(1))
-#         model.compile(loss = 'mse', optimizer='adam', metrics=['mae'])
-#         return model
-    
+
+from custom_hyper_model import LeanerRegressionModel
+from keras_tuner.tuners import Hyperband
+build_model = LeanerRegressionModel(num_classes= 10)   
     
 # from keras_tuner.tuners import RandomSearch
 # tuner = RandomSearch(
@@ -53,34 +45,22 @@ x_train, x_test, y_train, y_test = train_test_split(x,y, shuffle=True, train_siz
 
 
 #Hyperband로 찾는법
-#모델구성
-from keras.optimizers import Adam
-def bulid_model(hp):
-    model = Sequential()
-    for i in range(hp.Int('num_layers', 3,10)): #layer를 1~10
-        model.add(Dense(units=hp.Int('units_' + str(i),
-                                    min_value = 8,
-                                    max_value = 128,
-                                    step = 2),
-                                    activation=hp.Choice("activation", ["relu"])))
-        model.add(Dense(1))
-        model.compile(loss = 'mse', optimizer= Adam(hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4])), metrics=['mae'])
-        return model
     
-from keras_tuner.tuners import Hyperband
-tuner = Hyperband(bulid_model, objective='val_loss', max_epochs=1000, factor=10, 
+
+
+tuner = Hyperband(build_model, objective='val_loss', max_epochs=1000, factor=10, 
                   directory = '/Users/kongseon-eui/Documents/Workspace/AI_Project/_data/', project_name = 'hyperband')
 tuner.search(x_train, y_train, epochs = 1000, validation_split = 0.2)
 
 #get hyperparameters
-best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
+best_hps = tuner.get_best_hyperparameters(num_trials=3)[0]
 tuner.results_summary()
 
 from keras.callbacks import EarlyStopping
 #구성 훈련
 model = tuner.hypermodel.build(best_hps)
-es = [EarlyStopping(monitor='val_loss', mode='min', patience=10000, restore_best_weights= True)]
-history=model.fit(x_train, y_train, epochs =1000000, batch_size = 100, validation_split = 0.2,  callbacks = [es])
+es = [EarlyStopping(monitor='val_loss', mode='min', patience=1000, restore_best_weights= True)]
+history=model.fit(x_train, y_train, epochs =3000, batch_size = 100, validation_split = 0.2,  callbacks = [es])
 loss = model.evaluate(x_test, y_test)
 print("loss : ", loss)
 submit = model.predict(test_csv)
