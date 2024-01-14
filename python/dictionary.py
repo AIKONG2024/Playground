@@ -6,7 +6,7 @@
 # 딕셔너리 자료형 (순서x, 키 중복x, 수정o , 삭제 o)
 
 # 선언
-# a = {'name' : 'Kim', 'name': 'Lee'} #오류, 키 중복 허용안됨,
+# a = {'name' : 'Kim', 'name': 'Lee'} #오류 발생. 키 중복 허용안됨.
 a = {'name': 'Kim', 'phone' : '01033337777', 'birth' : '870514'} #key는 인트형도 가능. 보통 문자형으로 사용
 b = {0 : 'Hello Python'}
 c = {'arr': [1,2,3,4]} #키만 존재하면 모든 데이터형 사용이 가능.
@@ -47,9 +47,12 @@ list에 넣어서 많이 사용함. (json 형태)
 print('a - ', type(a), a)#a -  <class 'dict'> {'name': 'Kim', 'phone': '01033337777', 'birth': '870514'}
 print('b - ', type(b), b)#b -  <class 'dict'> {0: 'Hello Python'}
 print('c - ', type(c), c)#c -  <class 'dict'> {'arr': [1, 2, 3, 4]}
-print('d - ', type(d), d)#d -  <class 'dict'> {'Name': 'Niceman', 'City': 'Seoul', 'Age': 33, 'Grade': 'A', 'Status': True}
-print('e - ', type(e), e)#d -  <class 'dict'> {'Name': 'Niceman', 'City': 'Seoul', 'Age': 33, 'Grade': 'A', 'Status': True}
-print('f - ', type(f), f)#d -  <class 'dict'> {'Name': 'Niceman', 'City': 'Seoul', 'Age': 33, 'Grade': 'A', 'Status': True}
+print('d - ', type(d), d)#d -  <class 'dict'> {'Name': 'Niceman', 'City': 'Seoul', 'Age': 33, 
+#'Grade': 'A', 'Status': True}
+print('e - ', type(e), e)#d -  <class 'dict'> {'Name': 'Niceman', 'City': 'Seoul', 'Age': 33, 
+#'Grade': 'A', 'Status': True}
+print('f - ', type(f), f)#d -  <class 'dict'> {'Name': 'Niceman', 'City': 'Seoul', 'Age': 33, 
+#'Grade': 'A', 'Status': True}
 
 
 #출력
@@ -65,7 +68,8 @@ print('f - ', f.get('City')) #f - Seoul
 a['address'] = 'seoul'
 print('a - ', a) #a -  {'name': 'Kim', 'phone': '01033337777', 'birth': '870514', 'address': 'seoul'}
 a['rank'] = [1,2,3] #리스트 추가도 가능
-print('a - ', a) #a -  {'name': 'Kim', 'phone': '01033337777', 'birth': '870514', 'address': 'seoul', 'rank': [1, 2, 3]}
+print('a - ', a) #a -  {'name': 'Kim', 'phone': '01033337777', 'birth': '870514', 'address': 'seoul', 
+#'rank': [1, 2, 3]}
 
 #딕셔너리 길이
 print('a - ', len(a))
