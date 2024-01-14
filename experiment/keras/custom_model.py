@@ -51,7 +51,7 @@ class MulticlassClassificationModel(HyperModel):
         self.num_classes = num_classes
         
     def bulid_model(self, hp):
-        return CustomModel(loss='', activation='relu', last_activation='softmax',  metrics=['acc']).bulid_model(hp)    
+        return CustomModel(loss='', activation='relu', last_activation='softmax',last_activation='softmax'  metrics=['acc']).bulid_model(hp)    
     
     
 
