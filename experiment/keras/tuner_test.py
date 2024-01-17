@@ -15,6 +15,8 @@ x = train_csv.drop(['count'], axis=1) #axis 0이 행 1이 열
 y = train_csv['count'] 
 x_train, x_test, y_train, y_test = train_test_split(x,y, shuffle=True, train_size=0.8, random_state=12345)
 
+
+
 from custom_hyper_model import LeanerRegressionModel
 build_model = LeanerRegressionModel(num_classes= 10, output_count=1)   
 from keras.callbacks import EarlyStopping
@@ -40,9 +42,9 @@ es = [EarlyStopping(monitor='val_loss', mode='min', patience=100, restore_best_w
 
 #============= Hyperband로 찾는법
 from keras_tuner.tuners import Hyperband
-tuner = Hyperband(build_model, objective='val_loss', max_epochs=1000, factor=10, 
+tuner = Hyperband(build_model, objective='val_loss', max_epochs=1000, factor=3, 
                   directory = '/Users/kongseon-eui/Documents/Workspace/AI_Project/_data/', project_name = 'hyperband')
-tuner.search(x_train, y_train, epochs = 1000, validation_split = 0.2)
+tuner.search(x_train, y_train, epochs = 30, validation_split = 0.2)
 
 #get hyperparameters
 best_hps = tuner.get_best_hyperparameters(num_trials=3)[0]
