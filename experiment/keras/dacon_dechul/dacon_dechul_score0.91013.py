@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.models import Sequential, Model
+from keras.layers import Dense, Dropout, Input
 from keras.callbacks import EarlyStopping , ModelCheckpoint
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
@@ -96,21 +96,24 @@ print(x_train.shape)#(77029, 13)
 print(y_train.shape)#(77029, 7)
 
 #모델 생성
-model = Sequential()
-model.add(Dense(16, input_shape = (13,)))
-model.add(Dense(32,activation='swish'))
-model.add(Dense(16, activation='swish'))
-model.add(Dense(30, activation='swish'))
-model.add(Dense(32, activation='swish'))
-model.add(Dense(16, activation='swish'))
-model.add(Dense(7, activation='softmax'))
+
+m_input= Input(shape=(13,))
+m_layer1 = Dense(16)(m_input)
+m_layer2 = Dense(32, activation='swish')(m_layer1)
+m_layer3 = Dense(16, activation='swish')(m_layer2)
+m_layer4 = Dense(64, activation='swish')(m_layer3)
+m_layer5 = Dense(32, activation='swish')(m_layer4)
+m_layer6 = Dense(16, activation='swish')(m_layer5)
+m_output = Dense(7, activation='softmax')(m_layer6)
+model = Model(m_input,m_output)
+
 
 es = EarlyStopping(monitor='val_loss', mode = 'min', patience= 1000, restore_best_weights=True)
 mcp = ModelCheckpoint(monitor='val_loss', mode= 'min', save_best_only=True, verbose=1, filepath='..\_data\_save\MCP\keras26_MCP_11_dacon_dechul.hdf5')
 
 #컴파일 , 훈련
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
-history = model.fit(x_train, y_train, epochs=10000, batch_size=1000, verbose= 1, validation_split=0.2, callbacks=[es, mcp])
+history = model.fit(x_train, y_train, epochs=100000, batch_size=1000, verbose= 1, validation_split=0.20, callbacks=[es, mcp])
 
 #평가, 예측
 loss = model.evaluate(x_test, y_test)
