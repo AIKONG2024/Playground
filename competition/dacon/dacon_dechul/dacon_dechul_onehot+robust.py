@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 import sys
 
 sys.path.append("c:/Workspace/AIKONG/Playground/Playground/experiment/keras/")
-from custom_file_name import csv_file_name
+from custom_file_name import csv_file_name, h5_file_name
 
 import pandas as pd
 import numpy as np
@@ -97,7 +97,7 @@ model.add(Dense(64, activation='relu'))
 model.add(Dense(7, activation="softmax"))
 
 es = EarlyStopping(
-    monitor="val_loss", mode="min", patience=10000, restore_best_weights=True
+    monitor="val_loss", mode="min", patience=1000, restore_best_weights=True
 )
 mcp = ModelCheckpoint(
     monitor="val_loss",
@@ -129,14 +129,15 @@ arg_y_predict = np.argmax(y_predict, axis=1)
 
 f1_score = f1_score(arg_y_test, arg_y_predict, average="macro")
 print("f1_score :", f1_score)
-submission = np.argmax(model.predict(test_csv), axis=1)
+submission = ohe.inverse_transform(model.predict(test_csv))
 submission = lbe.inverse_transform(submission)
 
 submission_csv["대출등급"] = submission
 
-file_name = csv_file_name('sampleSubmission')
-file_path = path + file_name
-submission_csv.to_csv(file_path, index=False)
+file_name = csv_file_name(path, f'sampleSubmission_f1_{loss[0]:04f}_')
+submission_csv.to_csv(file_name, index=False)
+h5_file_name = h5_file_name(path, f'dechulModel_f1_{loss[0]:04f}_')
+model.save(h5_file_name)
 
 import matplotlib.pyplot as plt
 

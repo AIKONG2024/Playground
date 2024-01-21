@@ -82,7 +82,7 @@ model.add(Dense(64, input_shape=(len(x.columns),)))
 model.add(Dense(32, activation='swish'))
 model.add(Dense(16, activation='swish'))
 model.add(Dense(128, activation='swish'))
-model.add(Dropout(0.2))
+model.add(Dropout(0.15))
 model.add(Dense(32, activation='swish'))
 model.add(Dense(64, activation='swish'))
 model.add(Dense(7, activation="softmax"))
@@ -104,7 +104,7 @@ model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["acc"]
 history = model.fit(
     x_train,
     y_train,
-    epochs=10,
+    epochs=100000,
     batch_size=1000,
     verbose=1,
     validation_split=0.2,
