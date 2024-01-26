@@ -77,7 +77,6 @@ test_csv = scaler.transform(test_csv)
 
 # 모델 생성
 model = Sequential()
-model = Sequential()
 model.add(Dense(64, input_shape=(len(x.columns),)))
 model.add(Dense(32, activation='swish'))
 model.add(Dense(16, activation='swish'))

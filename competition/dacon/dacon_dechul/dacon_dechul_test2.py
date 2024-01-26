@@ -9,7 +9,7 @@ from sklearn.metrics import f1_score
 from sklearn.linear_model import LogisticRegression
 import sys
 
-sys.path.append("c:/Workspace/AIKONG/Playground/Playground/experiment/keras/")
+sys.path.append("c://Playground/experiment/keras/")
 # sys.path.append("c:/Playground/Playground/experiment/keras/") #122
 # sys.path.append("c:/Playground/experiment/keras/")#102
 
@@ -20,7 +20,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-path = 'c:/Workspace/AIKONG/_data/dacon/dechul/'
+path = 'c://_data/dacon/dechul/'
 
 # path = 'c:/_data/dacon/dechul/' #102, 122
 
@@ -130,7 +130,7 @@ ohe_y = ohe.fit_transform(y)
 
 # 데이터 분류
 x_train, x_test, y_train, y_test = train_test_split(
-    x, ohe_y, train_size=0.85, random_state=1234567, stratify=ohe_y
+    x, ohe_y, train_size=0.85, random_state=3243242234, stratify=ohe_y
 )
 print(np.unique(y_test, return_counts=True))
 
@@ -153,21 +153,42 @@ test_csv = scaler.transform(test_csv)
 
 입력레이어크기 : 13
 1. 뉴런 7~13
+레이어 :6
 2. 뉴런 : 6/3 + 7 = 9
+레이어 :8
 3. 뉴런 : 8/3 + 7 = 10
 출력레이어크기 : 7
 '''
+# 입력 레이어, 출력 레이어 크기 정의
+input_layer_size = 13
+output_layer_size = 7
+
+# 은닉 레이어 뉴런 수 계산
+hidden_layer_size = int((2/3) * input_layer_size + output_layer_size)
+
+# 은닉 레이어 뉴런 수가 입력 레이어 크기의 두 배보다 작은지 확인
+if hidden_layer_size > 2 * input_layer_size:
+    print("은닉 레이어의 뉴런 수가 너무 많습니다.")
+else:
+    print(f"은닉 레이어의 뉴런 수: {hidden_layer_size}")
+
 # 모델 생성
 model = Sequential()
-model.add(Dense(9, input_shape=(len(x.columns),)))
-model.add(Dense(9, activation='relu'))
-model.add(Dense(9, activation='relu'))
-model.add(Dense(9, activation='relu'))
-model.add(Dense(9, activation='relu'))
-model.add(Dense(7, activation="softmax"))
+model.add(Dense(hidden_layer_size, input_shape=(input_layer_size,), activation='relu'))
+model.add(Dense(hidden_layer_size, activation='swish'))
+model.add(Dense(hidden_layer_size, activation='swish'))
+model.add(Dense(hidden_layer_size, activation='swish'))
+model.add(Dense(hidden_layer_size, activation='swish'))
+model.add(Dense(hidden_layer_size, activation='swish'))
+model.add(Dense(hidden_layer_size, activation='swish'))
+model.add(Dense(hidden_layer_size, activation='relu'))
+model.add(Dense(hidden_layer_size, activation='relu'))
+model.add(Dense(hidden_layer_size, activation='relu'))
+model.add(Dense(hidden_layer_size, activation='relu'))
+model.add(Dense(output_layer_size, activation="softmax"))
 
 es = EarlyStopping(
-    monitor="val_loss", mode="min", patience=3000, restore_best_weights=True
+    monitor="val_loss", mode="min", patience=2000, restore_best_weights=True
 )
 
 # 컴파일 , 훈련

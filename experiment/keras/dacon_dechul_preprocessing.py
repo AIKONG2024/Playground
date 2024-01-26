@@ -18,6 +18,9 @@ submission_csv = pd.read_csv(path + "sample_submission.csv")
 (근로기간은 이상한 데이터 삭제)
 ======================================================
 '''
+print(test_csv['근로기간'].value_counts())
+
+
 #근로기간 이상치 제거
 train_csv['근로기간'] = train_csv['근로기간'].replace('<1 year', '< 1 year')
 train_csv['근로기간'] = train_csv['근로기간'].replace('3', '3 years')
