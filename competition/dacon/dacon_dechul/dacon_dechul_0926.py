@@ -9,8 +9,8 @@ from sklearn.metrics import f1_score
 from sklearn.linear_model import LogisticRegression
 import sys
 
-sys.path.append("c:/Workspace/AIKONG/Playground/Playground/experiment/keras/")
-# sys.path.append("c:/Playground/experiment/keras/")#102
+# sys.path.append("c:/Workspace/AIKONG/Playground/Playground/experiment/keras/")
+sys.path.append("c:/Playground/experiment/keras/")#102
 # sys.path.append("c:/Playground/Playground/experiment/keras/") #122
 
 
@@ -20,8 +20,8 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-path = 'c:/Workspace/AIKONG/_data/dacon/dechul/'
-# path = 'c:/_data/dacon/dechul/' #102, 122
+# path = 'c:/Workspace/AIKONG/_data/dacon/dechul/'
+path = 'c:/_data/dacon/dechul/' #102, 122
 
 
 # 데이터 가져오기
@@ -81,7 +81,6 @@ model.add(Dense(64, input_shape=(len(x.columns),)))
 model.add(Dense(32, activation='swish'))
 model.add(Dense(16, activation='swish'))
 model.add(Dense(128, activation='swish'))
-model.add(Dropout(0.15))
 model.add(Dense(32, activation='swish'))
 model.add(Dense(64, activation='swish'))
 model.add(Dense(7, activation="softmax"))
