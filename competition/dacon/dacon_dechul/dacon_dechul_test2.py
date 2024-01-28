@@ -52,23 +52,25 @@ submission_csv = pd.read_csv(path + "sample_submission.csv")
 전부 레이블로 처리하면? => evaluate_loss :0.182
 
 
+2024.01.26
+
 
 ======================================================
 '''
 #근로기간 이상치 제거
 #테스트 파일에도 존재하기 때문에 변경하지 않음. 주관적인 데이터 수정은 하지 않는다.
-# train_csv['근로기간'] = train_csv['근로기간'].replace('<1 year', '< 1 year')
-# train_csv['근로기간'] = train_csv['근로기간'].replace('3', '3 years')
-# train_csv['근로기간'] = train_csv['근로기간'].replace('1 years', '1 year')
-# test_csv['근로기간'] = test_csv['근로기간'].replace('<1 year', '< 1 year')
-# test_csv['근로기간'] = test_csv['근로기간'].replace('3', '3 years')
-# test_csv['근로기간'] = test_csv['근로기간'].replace('1 years', '1 year')
+train_csv['근로기간'] = train_csv['근로기간'].replace('<1 year', '< 1 year')
+train_csv['근로기간'] = train_csv['근로기간'].replace('3', '3 years')
+train_csv['근로기간'] = train_csv['근로기간'].replace('1 years', '1 year')
+test_csv['근로기간'] = test_csv['근로기간'].replace('<1 year', '< 1 year')
+test_csv['근로기간'] = test_csv['근로기간'].replace('3', '3 years')
+test_csv['근로기간'] = test_csv['근로기간'].replace('1 years', '1 year')
 # print(test_csv['근로기간'].value_counts())
 
 
 # Onehot
 ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
-#주택 소유상태 
+# 주택 소유상태 
 # ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['주택소유상태'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['주택소유상태']))
 # train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
 # train_csv.drop('주택소유상태', axis=1, inplace=True)
@@ -76,7 +78,7 @@ ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
 # test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
 # test_csv.drop('주택소유상태', axis=1, inplace=True)
 
-# #대출목적
+#대출목적
 # ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
 # train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
 # train_csv.drop('대출목적', axis=1, inplace=True)
@@ -84,7 +86,7 @@ ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
 # test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
 # test_csv.drop('대출목적', axis=1, inplace=True)
 
-# #근로기간
+#근로기간
 # ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['근로기간'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['근로기간']))
 # train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
 # train_csv.drop('근로기간', axis=1, inplace=True)
@@ -92,7 +94,7 @@ ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
 # test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
 # test_csv.drop('근로기간', axis=1, inplace=True)
 
-# #대출기간
+#대출기간
 # ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['대출기간'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출기간']))
 # train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
 # train_csv.drop('대출기간', axis=1, inplace=True)
@@ -106,7 +108,7 @@ lbe = LabelEncoder()
 #주택소유상태
 train_csv["주택소유상태"] = lbe.fit_transform(train_csv["주택소유상태"])
 test_csv["주택소유상태"] = lbe.transform(test_csv["주택소유상태"])
-# 대출목적
+# # 대출목적
 train_csv["대출목적"] = lbe.fit_transform(train_csv["대출목적"])
 if '결혼' not in lbe.classes_:
     lbe.classes_ = np.append(lbe.classes_, '결혼')
@@ -130,8 +132,15 @@ ohe_y = ohe.fit_transform(y)
 
 # 데이터 분류
 x_train, x_test, y_train, y_test = train_test_split(
-    x, ohe_y, train_size=0.85, random_state=3243242234, stratify=ohe_y
+    x, ohe_y, train_size=0.80, random_state=777, stratify=ohe_y
 )
+
+#증폭
+# from imblearn.over_sampling import SMOTE
+# smote = SMOTE(random_state=777, k_neighbors=5)
+# x_train, y_train = smote.fit_resample(x_train, y_train)
+
+
 print(np.unique(y_test, return_counts=True))
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
@@ -146,6 +155,8 @@ test_csv = scaler.transform(test_csv)
 
 # print(x_train.shape) 
 # print(y_train.shape)  dsds
+
+
 '''
 은닉 뉴런의 수는 입력 레이어의 크기와 출력 레이어의 크기 사이에 있어야 합니다.
 은닉 뉴런의 수는 입력 레이어 크기의 2/3에 출력 레이어 크기를 더한 값이어야 합니다.
@@ -168,23 +179,19 @@ hidden_layer_size = int((2/3) * input_layer_size + output_layer_size)
 
 # 은닉 레이어 뉴런 수가 입력 레이어 크기의 두 배보다 작은지 확인
 if hidden_layer_size > 2 * input_layer_size:
-    print("은닉 레이어의 뉴런 수가 너무 많습니다.")
+    print("too may hidden neurons")
 else:
-    print(f"은닉 레이어의 뉴런 수: {hidden_layer_size}")
+    print(f"neurons: {hidden_layer_size}")
 
 # 모델 생성
 model = Sequential()
 model.add(Dense(hidden_layer_size, input_shape=(input_layer_size,), activation='relu'))
-model.add(Dense(hidden_layer_size, activation='swish'))
-model.add(Dense(hidden_layer_size, activation='swish'))
-model.add(Dense(hidden_layer_size, activation='swish'))
-model.add(Dense(hidden_layer_size, activation='swish'))
-model.add(Dense(hidden_layer_size, activation='swish'))
-model.add(Dense(hidden_layer_size, activation='swish'))
-model.add(Dense(hidden_layer_size, activation='relu'))
-model.add(Dense(hidden_layer_size, activation='relu'))
-model.add(Dense(hidden_layer_size, activation='relu'))
-model.add(Dense(hidden_layer_size, activation='relu'))
+model.add(Dense(hidden_layer_size-4, activation='relu'))
+model.add(Dense(hidden_layer_size+4, activation='relu'))
+model.add(Dense(hidden_layer_size-3, activation='relu'))
+model.add(Dense(hidden_layer_size+3, activation='relu'))
+model.add(Dense(hidden_layer_size-4, activation='relu'))
+model.add(Dense(hidden_layer_size+4, activation='relu'))
 model.add(Dense(output_layer_size, activation="softmax"))
 
 es = EarlyStopping(
@@ -197,7 +204,7 @@ history = model.fit(
     x_train,
     y_train,
     epochs=100000,
-    batch_size=1000,
+    batch_size=10000,
     verbose=1,
     validation_split=0.2,
     callbacks=[es],
@@ -220,7 +227,7 @@ submission_csv["대출등급"] = submission
 
 file_name = csv_file_name(path, f'sampleSubmission_loss_{loss[0]:04f}_')
 submission_csv.to_csv(file_name, index=False)
-h5_file_name = h5_file_name(path, f'dechulModel_loss_{loss[0]:04f}_')
+h5_file_name = h5_file_name(path, f'dechulModel_loss_{loss[0]:04f}_f1_{f1_score:04f}_')
 model.save(h5_file_name)
 
 import matplotlib.pyplot as plt

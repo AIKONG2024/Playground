@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-path = 'c:/Workspace/AIKONG/_data/dacon/dechul/'
+path = 'c://_data/dacon/dechul/'
 
 # 데이터 가져오기
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
@@ -22,42 +22,78 @@ print(test_csv['근로기간'].value_counts())
 
 
 #근로기간 이상치 제거
-train_csv['근로기간'] = train_csv['근로기간'].replace('<1 year', '< 1 year')
-train_csv['근로기간'] = train_csv['근로기간'].replace('3', '3 years')
-train_csv['근로기간'] = train_csv['근로기간'].replace('1 years', '1 year')
-test_csv['근로기간'] = test_csv['근로기간'].replace('<1 year', '< 1 year')
-test_csv['근로기간'] = test_csv['근로기간'].replace('3', '3 years')
-test_csv['근로기간'] = test_csv['근로기간'].replace('1 years', '1 year')
+# train_csv['근로기간'] = train_csv['근로기간'].replace('<1 year', '< 1 year')
+# train_csv['근로기간'] = train_csv['근로기간'].replace('3', '3 years')
+# train_csv['근로기간'] = train_csv['근로기간'].replace('1 years', '1 year')
+# test_csv['근로기간'] = test_csv['근로기간'].replace('<1 year', '< 1 year')
+# test_csv['근로기간'] = test_csv['근로기간'].replace('3', '3 years')
+# test_csv['근로기간'] = test_csv['근로기간'].replace('1 years', '1 year')
 # print(test_csv['근로기간'].value_counts())
 
 
 # Onehot
 ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
 #주택 소유상태 
-ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['주택소유상태'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['주택소유상태']))
-train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
-train_csv.drop('주택소유상태', axis=1, inplace=True)
-ohe_test_df = pd.DataFrame(ohe.transform(test_csv['주택소유상태'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['주택소유상태']))
-test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
-test_csv.drop('주택소유상태', axis=1, inplace=True)
-#대출목적
-ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
-train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
-train_csv.drop('대출목적', axis=1, inplace=True)
-ohe_test_df = pd.DataFrame(ohe.transform(test_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
-test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
-test_csv.drop('대출목적', axis=1, inplace=True)
+# ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['주택소유상태'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['주택소유상태']))
+# train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
+# train_csv.drop('주택소유상태', axis=1, inplace=True)
+# ohe_test_df = pd.DataFrame(ohe.transform(test_csv['주택소유상태'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['주택소유상태']))
+# test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
+# test_csv.drop('주택소유상태', axis=1, inplace=True)
+# #대출목적
+# ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
+# train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
+# train_csv.drop('대출목적', axis=1, inplace=True)
+# ohe_test_df = pd.DataFrame(ohe.transform(test_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
+# test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
+# test_csv.drop('대출목적', axis=1, inplace=True)
 
 lbe = LabelEncoder()
-#근로기간
-test_csv["근로기간"] = lbe.fit_transform(test_csv["근로기간"])
+#주택소유상태
+train_csv["주택소유상태"] = lbe.fit_transform(train_csv["주택소유상태"])
+test_csv["주택소유상태"] = lbe.transform(test_csv["주택소유상태"])
+# 대출목적
+train_csv["대출목적"] = lbe.fit_transform(train_csv["대출목적"])
+if '결혼' not in lbe.classes_:
+    lbe.classes_ = np.append(lbe.classes_, '결혼')
+test_csv["대출목적"] = lbe.transform(test_csv["대출목적"])
+# 근로기간
 train_csv["근로기간"] = lbe.fit_transform(train_csv["근로기간"])
-#대출기간
-test_csv["대출기간"] = lbe.fit_transform(test_csv["대출기간"])
+test_csv["근로기간"] = lbe.transform(test_csv["근로기간"])
+# 대출기간
 train_csv["대출기간"] = lbe.fit_transform(train_csv["대출기간"])
-#대출등급 - 마지막
+test_csv["대출기간"] = lbe.transform(test_csv["대출기간"])
+
+#대출등급 - 마지막 Label fit
 train_csv["대출등급"] = lbe.fit_transform(train_csv["대출등급"])
 
 x = train_csv.drop("대출등급", axis=1)
 y = train_csv["대출등급"]
-print(train_csv.shape)
+
+print(x.shape)
+print(y.shape)
+print(pd.value_counts(y))
+print(lbe.classes_)
+
+print("=="*70)
+
+'''
+['A' 'B' 'C' 'D' 'E' 'F' 'G']
+1    28817
+2    27623
+0    16772
+3    13354
+4     7354
+5     1954
+6      420
+'''
+from imblearn.over_sampling import SMOTE, SMOTEN, SMOTENC
+smote = SMOTE(random_state=777, sampling_strategy='minority')
+x, y = smote.fit_resample(x, y)
+
+print(x.shape)
+print(y.shape)
+print(pd.value_counts(y))
+
+
+print("=="*70)
