@@ -79,9 +79,9 @@ y = train_csv["대출등급"]
 
 
 # ============================augument====================================
-# from imblearn.over_sampling import SMOTE
-# smote = SMOTE(random_state=777, sampling_strategy={0: 28817, 2: 28817, 3: 28817, 4: 28817, 5: 28817, 6: 28817})
-# x,y = smote.fit_resample(x,y)
+from imblearn.over_sampling import SMOTE
+smote = SMOTE(random_state=777, sampling_strategy={0: 25000, 2: 28817, 3: 20000, 4: 10000, 5: 6000, 6: 3000})
+X,y = smote.fit_resample(X,y)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, train_size=0.85, random_state=777, stratify=y
@@ -116,13 +116,18 @@ else:
 # 2. 모델 구성
 model = Sequential()
 model.add(Dense(hidden_layer_size, input_shape=(input_layer_size,), activation="relu"))
-model.add(Dense(hidden_layer_size + 2, activation="relu"))
-model.add(Dense(hidden_layer_size - 2, activation="relu"))
-model.add(Dense(hidden_layer_size + 3, activation="relu"))
-model.add(Dense(hidden_layer_size + 10, activation="relu"))
-model.add(Dense(hidden_layer_size - 3, activation="relu"))
-model.add(Dense(hidden_layer_size + 3, activation="relu"))
-model.add(Dense(hidden_layer_size - 3, activation="relu"))
+model.add(Dense(hidden_layer_size +2, activation="relu"))
+model.add(Dense(hidden_layer_size -1, activation="relu"))
+model.add(Dense(hidden_layer_size +3, activation="relu"))
+model.add(Dense(hidden_layer_size -2, activation="relu"))
+model.add(Dense(hidden_layer_size +10, activation="relu"))
+model.add(Dense(hidden_layer_size -5, activation="relu"))
+model.add(Dense(hidden_layer_size +8, activation="relu"))
+model.add(Dense(hidden_layer_size -4, activation="relu"))
+model.add(Dense(hidden_layer_size +3, activation="relu"))
+model.add(Dense(hidden_layer_size -1, activation="relu"))
+model.add(Dense(hidden_layer_size +2, activation="relu"))
+model.add(Dense(hidden_layer_size -5, activation="relu"))
 model.add(Dense(output_layer_size, activation="softmax"))
 
 
