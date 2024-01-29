@@ -32,7 +32,7 @@ def extract_근로기간(s):
     if "10+ " in s or "10+" in s:
         return 11. #격차를 최대한 작게 1단위
     elif "< 1" in s or "<1" in s:
-        return 0.1
+        return .1
     elif "Unknown" in s:
         return 0.
     elif "1 years" in s:
@@ -89,29 +89,30 @@ from imblearn.over_sampling import SMOTE
 # )
 
 smote = SMOTE(
-    random_state=4342,
+    random_state=12345,
     sampling_strategy={
-        0: 28817,
+        0: 16772,
         1: 28817,
-        2: 28817,
-        3: 28817,
-        # 4: 28817,
-        # 5: 4000,
-        # 6: 1000
+        2: 27623,
+        3: 13354,
+        4: 7354,
+        5: 1954,
+        6: 420
     },
-     k_neighbors=3
+     k_neighbors=10
 )
 
 
-# value_counts = X['대출금액'].value_counts()
-# to_remove = value_counts[value_counts < 10].index
-# train_csv = X[~X['대출금액'].isin(to_remove)]
-# # X, y = smote.fit_resample(X, y)
 
-# value_counts = X['연간소득'].value_counts()
-# to_remove = value_counts[value_counts < 10].index
-# train_csv = X[~X['연간소득'].isin(to_remove)]
-# # X, y = smote.fit_resample(X, y)
+value_counts = X['대출금액'].value_counts()
+to_remove = value_counts[value_counts < 2].index
+train_csv = X[~X['대출금액'].isin(to_remove)]
+X, y = smote.fit_resample(X, y)
+
+value_counts = X['연간소득'].value_counts()
+to_remove = value_counts[value_counts < 2].index
+train_csv = X[~X['연간소득'].isin(to_remove)]
+X, y = smote.fit_resample(X, y)
 
 # value_counts = X['총상환원금'].value_counts()
 # to_remove = value_counts[value_counts < 10].index
