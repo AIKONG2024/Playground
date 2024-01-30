@@ -32,7 +32,7 @@ def extract_근로기간(s):
     if "10+ " in s or "10+" in s:
         return 11. #격차를 최대한 작게 1단위
     elif "< 1" in s or "<1" in s:
-        return .1
+        return 0.1
     elif "Unknown" in s:
         return 0.
     elif "1 years" in s:
@@ -48,13 +48,13 @@ train_csv["근로기간"] = train_csv["근로기간"].apply(extract_근로기간
 test_csv["근로기간"] = test_csv["근로기간"].apply(extract_근로기간)
 
 #원핫처리 (Data Leakage 방지)
-ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
-ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
-train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
-train_csv.drop('대출목적', axis=1, inplace=True)
-ohe_test_df = pd.DataFrame(ohe.transform(test_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
-test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
-test_csv.drop('대출목적', axis=1, inplace=True)
+# ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
+# ohe_train_df = pd.DataFrame(ohe.fit_transform(train_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
+# train_csv = pd.concat([train_csv.reset_index(drop=True), ohe_train_df.reset_index(drop=True)], axis=1)
+# train_csv.drop('대출목적', axis=1, inplace=True)
+# ohe_test_df = pd.DataFrame(ohe.transform(test_csv['대출목적'].values.reshape(-1,1)), columns=ohe.get_feature_names_out(['대출목적']))
+# test_csv = pd.concat([test_csv.reset_index(drop=True), ohe_test_df.reset_index(drop=True)], axis=1)
+# test_csv.drop('대출목적', axis=1, inplace=True)
 
 # ============================레이블 인코딩==============================
 # 레이블 인코딩
@@ -63,6 +63,10 @@ lbe = LabelEncoder()
 # 주택소유상태
 train_csv["주택소유상태"] = lbe.fit_transform(train_csv["주택소유상태"])
 test_csv["주택소유상태"] = lbe.transform(test_csv["주택소유상태"])
+
+#대출목적
+train_csv['대출목적'] = lbe.fit_transform(train_csv["대출목적"])
+test_csv['대출목적'] = lbe.fit_transform(test_csv["대출목적"])
 
 # 대출등급 - 마지막 Label fit
 train_csv["대출등급"] = lbe.fit_transform(train_csv["대출등급"])
@@ -90,34 +94,33 @@ from imblearn.over_sampling import SMOTE
 
 smote = SMOTE(
     random_state=12345,
-    sampling_strategy={
-        0: 16772,
-        1: 28817,
-        2: 27623,
-        3: 13354,
-        4: 7354,
-        5: 1954,
-        6: 420
-    },
-     k_neighbors=10
+    # sampling_strategy={
+    #     0: 17000,
+    #     1: 28817,
+    #     2: 28000,
+    #     3: 13354,
+    #     4: 7354,
+    #     5: 1954,
+    #     6: 420
+    # },
+     k_neighbors=2
 )
 
 
+# value_counts = X['대출금액'].value_counts()
+# to_remove = value_counts[value_counts < 2].index
+# train_csv = X[~X['대출금액'].isin(to_remove)]
+# X, y = smote.fit_resample(X, y)
 
-value_counts = X['대출금액'].value_counts()
-to_remove = value_counts[value_counts < 2].index
-train_csv = X[~X['대출금액'].isin(to_remove)]
-X, y = smote.fit_resample(X, y)
-
-value_counts = X['연간소득'].value_counts()
-to_remove = value_counts[value_counts < 2].index
-train_csv = X[~X['연간소득'].isin(to_remove)]
-X, y = smote.fit_resample(X, y)
+# value_counts = X['연간소득'].value_counts()
+# to_remove = value_counts[value_counts < 2].index
+# train_csv = X[~X['연간소득'].isin(to_remove)]
+# X, y = smote.fit_resample(X, y)
 
 # value_counts = X['총상환원금'].value_counts()
-# to_remove = value_counts[value_counts < 10].index
+# to_remove = value_counts[value_counts < 2].index
 # train_csv = X[~X['총상환원금'].isin(to_remove)]
-# # X, y = smote.fit_resample(X, y)
+# X, y = smote.fit_resample(X, y)
 
 # value_counts = X['최근_2년간_연체_횟수'].value_counts()
 # to_remove = value_counts[value_counts < 10].index
@@ -125,17 +128,17 @@ X, y = smote.fit_resample(X, y)
 # X, y = smote.fit_resample(X, y)
 
 # value_counts = X['총상환원금'].value_counts()
-# to_remove = value_counts[value_counts < 20].index
+# to_remove = value_counts[value_counts < 2].index
 # train_csv = X[~X['총상환원금'].isin(to_remove)]
 # X, y = smote.fit_resample(X, y)
 
 # value_counts = X['부채_대비_소득_비율'].value_counts()
-# to_remove = value_counts[value_counts < 20].index
+# to_remove = value_counts[value_counts < 2].index
 # train_csv = X[~X['부채_대비_소득_비율'].isin(to_remove)]
 # X, y = smote.fit_resample(X, y)
 
 # value_counts = X['총계좌수'].value_counts()
-# to_remove = value_counts[value_counts < 100].index
+# to_remove = value_counts[value_counts < 2].index
 # train_csv = X[~X['총계좌수'].isin(to_remove)]
 # X, y = smote.fit_resample(X, y)
 
@@ -172,15 +175,15 @@ test_csv = scaler.transform(test_csv)
 
 
 # ============================Modelng======================================
-input_layer_size = 24
-output_layer_size = 7
-hidden_layer_size = int((2 / 3) * input_layer_size + output_layer_size)
-if hidden_layer_size > 2 * input_layer_size:
-    print("뉴런수 많음...................")
-    exit(0)
-else:
-    print(f"+++++++++뉴런 수: {hidden_layer_size}+++++++++++++++")
 # 2. 모델 구성
+# input_layer_size = 24
+# output_layer_size = 7
+# hidden_layer_size = int((2 / 3) * input_layer_size + output_layer_size)
+# if hidden_layer_size > 2 * input_layer_size:
+#     print("뉴런수 많음...................")
+#     exit(0)
+# else:
+#     print(f"+++++++++뉴런 수: {hidden_layer_size}+++++++++++++++")
 # model = Sequential()
 # model.add(Dense(hidden_layer_size, input_shape=(input_layer_size,), activation="relu"))
 # model.add(Dense(hidden_layer_size +2, activation="relu"))
@@ -201,7 +204,7 @@ model = Sequential()
 model.add(Dense(64, input_shape=(len(X.columns),)))
 model.add(Dense(32, activation='swish'))
 model.add(Dense(16, activation='swish'))
-model.add(Dense(64, activation='swish'))
+model.add(Dense(32, activation='swish'))
 model.add(Dense(32, activation='swish'))
 model.add(Dense(64, activation='swish'))
 model.add(Dense(7, activation="softmax"))
@@ -209,7 +212,7 @@ model.add(Dense(7, activation="softmax"))
 
 
 es = EarlyStopping(
-    monitor="val_loss", mode="min", patience=1000, restore_best_weights=True
+    monitor="val_loss", mode="min", patience=1600, restore_best_weights=True
 )
 
 # 3. 컴파일 , 훈련
@@ -222,7 +225,7 @@ model.compile(
 history = model.fit(
     x_train,
     y_train,
-    epochs=20000,
+    epochs=50000,
     batch_size=1000,
     verbose=1,
     validation_split=0.2,
