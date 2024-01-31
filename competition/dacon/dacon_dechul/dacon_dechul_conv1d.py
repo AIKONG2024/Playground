@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Conv1D
+from keras.layers import Dense, Dropout, Conv1D, Flatten
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
@@ -154,11 +154,11 @@ smote = SMOTE(
 # value_counts = X['연체계좌수'].value_counts()
 # to_remove = value_counts[value_counts < 20].index
 # train_csv = X[~X['연체계좌수'].isin(to_remove)]
-X, y = smote.fit_resample(X, y)
+# X, y = smote.fit_resample(X, y)
 
 # ============================train,test seperate================================
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, train_size=0.8, random_state=1234567, stratify=y
+    X, y, train_size=0.9, random_state=821, stratify=y
 )
 
 # ============================scaling=====================================
@@ -207,12 +207,23 @@ test_csv = scaler.transform(test_csv)
 
 model = Sequential()
 model.add(Conv1D(64, kernel_size=2, input_shape=(len(X.columns),1)))
+model.add(Flatten())
 # model.add(Dense(64, input_shape=(len(X.columns),)))
 model.add(Dense(32, activation="swish"))
 model.add(Dense(16, activation="swish"))
-model.add(Dense(128, activation="swish"))
+model.add(Dense(20, activation="swish"))
 model.add(Dense(32, activation="swish"))
-model.add(Dense(64, activation="swish"))
+model.add(Dense(16, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(16, activation="swish"))
+model.add(Dense(20, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(16, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(16, activation="swish"))
+model.add(Dense(20, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(16, activation="swish"))
 model.add(Dense(7, activation="softmax"))
 
 
