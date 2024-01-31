@@ -161,7 +161,7 @@ smote = SMOTE(
 
 # ============================train,test seperate================================
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, train_size=0.85, random_state=777777, stratify=y
+    X, y, train_size=0.8, random_state=1234567, stratify=y
 )
 
 # ============================scaling=====================================
@@ -210,28 +210,12 @@ test_csv = scaler.transform(test_csv)
 
 model = Sequential()
 model.add(Conv1D(64, kernel_size=2, input_shape=(len(X.columns),1)))
-model.add(Conv1D(32, kernel_size=2 ))
-model.add(Conv1D(32, kernel_size=2 ))
-model.add(Conv1D(32, kernel_size=2 ))
-model.add(Conv1D(32, kernel_size=2 ))
-model.add(Flatten())
 # model.add(Dense(64, input_shape=(len(X.columns),)))
 model.add(Dense(32, activation="swish"))
 model.add(Dense(16, activation="swish"))
+model.add(Dense(128, activation="swish"))
 model.add(Dense(32, activation="swish"))
-model.add(Dense(14, activation="swish"))
-model.add(Dense(32, activation="swish"))
-model.add(Dense(32, activation="swish"))
-model.add(Dense(16, activation="swish"))
-model.add(Dense(32, activation="swish"))
-model.add(Dense(16, activation="swish"))
-model.add(Dense(32, activation="swish"))
-model.add(Dense(14, activation="swish"))
-model.add(Dense(32, activation="swish"))
-model.add(Dense(32, activation="swish"))
-model.add(Dense(16, activation="swish"))
-model.add(Dense(32, activation="swish"))
-model.add(Dense(14, activation="swish"))
+model.add(Dense(64, activation="swish"))
 model.add(Dense(7, activation="softmax"))
 
 
