@@ -17,11 +17,11 @@ class CustomHyperModel(HyperModel):
     #private    
     def build(self, hp):
         model = Sequential()
-        for i in range(hp.Int('num_layers', 0,5)): #layer를 0~5
+        for i in range(hp.Int('num_layers', 10,15)): #layer를 0~5
             model.add(Dense(units=hp.Int('units_' + str(i),
                                         min_value = 16,
-                                        max_value = 256,
-                                        step = 16),
+                                        max_value = 32,
+                                        step = 4),
                                         activation=hp.Choice("activation", self.hidden_activations)))
         if self.last_activation:
             model.add(Dense(self.output_count, activation=self.last_activation))
@@ -55,7 +55,7 @@ class MulticlassClassificationModel(HyperModel):
         self.output_count = output_count
         
     def build(self, hp):
-        return CustomHyperModel(loss='categorical_crossentropy',hidden_activations = ['relu'], last_activation='softmax', metrics=['acc'], output_count= self.output_count).build(hp)    
+        return CustomHyperModel(loss='sparse_categorical_crossentropy',hidden_activations = ['swish'], last_activation='softmax', metrics=['acc'], output_count= self.output_count).build(hp)    
     
 
 

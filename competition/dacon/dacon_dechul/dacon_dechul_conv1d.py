@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Conv1D
+from keras.layers import Dense, Dropout, Conv1D, Flatten
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
@@ -30,26 +30,26 @@ def splits(s):
     return int(s.split()[0])
 
 
-def extract_근로기간(s):
-    if "10+ " in s or "10+" in s:
-        return 11.0  # 격차를 최대한 작게 1단위
-    elif "< 1" in s or "<1" in s:
-        return 0.1
-    elif "Unknown" in s:
-        return 0.0
-    elif "1 years" in s:
-        return 1.0
-    elif "3" == s:
-        return 3.0
-    else:
-        return splits(s)
+# def extract_근로기간(s):
+#     if "10+ " in s or "10+" in s:
+#         return 11.0  # 격차를 최대한 작게 1단위
+#     elif "< 1" in s or "<1" in s:
+#         return 0.1
+#     elif "Unknown" in s:
+#         return 0.0
+#     elif "1 years" in s:
+#         return 1.0
+#     elif "3" == s:
+#         return 3.0
+#     else:
+#         return splits(s)
 
 
 train_csv["대출기간"] = train_csv["대출기간"].apply(splits)
 test_csv["대출기간"] = test_csv["대출기간"].apply(splits)
 
-train_csv["근로기간"] = train_csv["근로기간"].apply(extract_근로기간)
-test_csv["근로기간"] = test_csv["근로기간"].apply(extract_근로기간)
+# train_csv["근로기간"] = train_csv["근로기간"].apply(extract_근로기간)
+# test_csv["근로기간"] = test_csv["근로기간"].apply(extract_근로기간)
 
 # 원핫처리 (Data Leakage 방지)
 # ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
@@ -71,6 +71,9 @@ test_csv["주택소유상태"] = lbe.transform(test_csv["주택소유상태"])
 # 대출목적
 train_csv["대출목적"] = lbe.fit_transform(train_csv["대출목적"])
 test_csv["대출목적"] = lbe.fit_transform(test_csv["대출목적"])
+
+train_csv["근로기간"] = lbe.fit_transform(train_csv["근로기간"])
+test_csv["근로기간"] = lbe.fit_transform(test_csv["근로기간"])
 
 # 대출등급 - 마지막 Label fit
 train_csv["대출등급"] = lbe.fit_transform(train_csv["대출등급"])
@@ -154,11 +157,11 @@ smote = SMOTE(
 # value_counts = X['연체계좌수'].value_counts()
 # to_remove = value_counts[value_counts < 20].index
 # train_csv = X[~X['연체계좌수'].isin(to_remove)]
-X, y = smote.fit_resample(X, y)
+# X, y = smote.fit_resample(X, y)
 
 # ============================train,test seperate================================
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, train_size=0.8, random_state=1234567, stratify=y
+    X, y, train_size=0.85, random_state=777777, stratify=y
 )
 
 # ============================scaling=====================================
@@ -207,17 +210,33 @@ test_csv = scaler.transform(test_csv)
 
 model = Sequential()
 model.add(Conv1D(64, kernel_size=2, input_shape=(len(X.columns),1)))
+model.add(Conv1D(32, kernel_size=2 ))
+model.add(Conv1D(32, kernel_size=2 ))
+model.add(Conv1D(32, kernel_size=2 ))
+model.add(Conv1D(32, kernel_size=2 ))
+model.add(Flatten())
 # model.add(Dense(64, input_shape=(len(X.columns),)))
 model.add(Dense(32, activation="swish"))
 model.add(Dense(16, activation="swish"))
-model.add(Dense(128, activation="swish"))
 model.add(Dense(32, activation="swish"))
-model.add(Dense(64, activation="swish"))
+model.add(Dense(14, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(16, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(16, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(14, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(16, activation="swish"))
+model.add(Dense(32, activation="swish"))
+model.add(Dense(14, activation="swish"))
 model.add(Dense(7, activation="softmax"))
 
 
 es = EarlyStopping(
-    monitor="val_loss", mode="min", patience=1600, restore_best_weights=True
+    monitor="val_loss", mode="min", patience=10000, restore_best_weights=True
 )
 
 # 3. 컴파일 , 훈련
@@ -230,8 +249,8 @@ model.compile(
 history = model.fit(
     x_train,
     y_train,
-    epochs=50000,
-    batch_size=1000,
+    epochs=1000000,
+    batch_size=5000,
     verbose=1,
     validation_split=0.2,
     callbacks=[es],
