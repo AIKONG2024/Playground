@@ -17,11 +17,11 @@ class CustomHyperModel(HyperModel):
     #private    
     def build(self, hp):
         model = Sequential()
-        for i in range(hp.Int('num_layers', 10,15)): #layer를 0~5
+        for i in range(hp.Int('num_layers', 10,25)): #layer를 0~5
             model.add(Dense(units=hp.Int('units_' + str(i),
-                                        min_value = 16,
-                                        max_value = 32,
-                                        step = 4),
+                                        min_value = 2,
+                                        max_value = 50,
+                                        step = 2),
                                         activation=hp.Choice("activation", self.hidden_activations)))
         if self.last_activation:
             model.add(Dense(self.output_count, activation=self.last_activation))

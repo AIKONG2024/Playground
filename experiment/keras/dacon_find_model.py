@@ -8,6 +8,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from keras_tuner.tuners import Hyperband
 from custom_hyper_model import MulticlassClassificationModel
+import sys
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+# custom 모듈 import
+sys.path.append("c://Playground/experiment/keras/")
+from custom_file_name import csv_file_name, h5_file_name
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기
@@ -78,10 +84,10 @@ from sklearn.preprocessing import (
     RobustScaler,
 )
 
-# scaler = MinMaxScaler()
-scaler = StandardScaler()
+# scaler = MinMaxScaler(feature_range=(0,10))
+# scaler = StandardScaler()
 # scaler = MaxAbsScaler()
-# scaler = RobustScaler()
+scaler = RobustScaler()
 
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
@@ -91,7 +97,7 @@ test_csv = scaler.transform(test_csv)
 print(x_train.shape)  # (77029, 13)
 print(y_train.shape)  # (77029, 7)
 es = EarlyStopping(
-    monitor="val_loss", mode="min", patience=10000, restore_best_weights=True
+    monitor="val_loss", mode="min", patience=3000, restore_best_weights=True
 )
 build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
 
@@ -100,7 +106,7 @@ tuner = Hyperband(
     objective="val_loss",
     max_epochs=1000,
     factor=3,
-    executions_per_trial=3,
+    executions_per_trial=1,
     directory="C:\_data\dacon\dechul\\",
     project_name="hyperband",
 )
@@ -121,7 +127,7 @@ history = model.fit(
     x_train,
     y_train,
     epochs=1000000,
-    batch_size=400,
+    batch_size=800,
     verbose=1,
     validation_split=0.2,
     callbacks=[es],
@@ -161,3 +167,39 @@ plt.plot(history.history["val_acc"], color="blue", label="val_acc", marker=".")
 plt.xlabel = "epochs"
 plt.ylabel = "loss"
 plt.show()
+
+'''
+15                |10                |num_layers
+42                |48                |units_0
+swish             |swish             |activation
+42                |38                |units_1
+28                |44                |units_2
+30                |46                |units_3
+16                |32                |units_4
+12                |20                |units_5
+6                 |10                |units_6
+18                |8                 |units_7
+38                |18                |units_8
+10                |40                |units_9
+0.01              |0.01              |learning_rate
+16                |26                |units_10
+14                |8                 |units_11
+6                 |38                |units_12
+44                |36                |units_13
+42                |46                |units_14
+32                |16                |units_15
+26                |18                |units_16
+16                |4                 |units_17
+12                |40                |units_18
+26                |30                |units_19
+38                |36                |units_20
+16                |20                |units_21
+4                 |6                 |units_22
+38                |12                |units_23
+6                 |10                |units_24
+112               |1000              |tuner/epochs
+38                |334               |tuner/initial_epoch
+5                 |6                 |tuner/bracket
+3                 |6                 |tuner/round
+1710              |1250              |tuner/trial_id
+'''
