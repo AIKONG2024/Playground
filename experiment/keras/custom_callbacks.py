@@ -1,19 +1,23 @@
 # https://www.tensorflow.org/guide/keras/custom_callback?hl=ko
+#v1. 24.02.03 KONG SEONUI
 import keras
 import numpy as np
 
 
 # EarlyStopping 뜯어고치기
-# monitor: 모니터링 metrics, stop_line: 내려가다가 멈출 기준
+
+# monitor: 모니터링 metrics
+# overfitting_stop_line : 과적합 되면 멈출 기준
+# overfitting_count : 과적합 카운팅 기준
 class CustomEarlyStoppingAtLoss(keras.callbacks.Callback):
-    def __init__(self, patience=0, monitor="loss", stop_line=0.0, is_log=False):
+    def __init__(self, patience=0, monitor="loss", overfitting_stop_line=0.0, overfitting_count = 0, is_log=False):
         super(CustomEarlyStoppingAtLoss, self).__init__()
         self.patience = patience
         self.best_weights = None
         self.monitor = monitor
-        self.stop_line = stop_line
+        self.overfitting_stop_line = overfitting_stop_line
         self.is_log = is_log
-
+        self.overfitting_count = overfitting_count
     def on_train_begin(self, logs=None):
         self.wait = 0
         self.stopped_epoch = 0
@@ -28,15 +32,19 @@ class CustomEarlyStoppingAtLoss(keras.callbacks.Callback):
             if self.is_log:
                 print(
                 f"""
-                ❗❗❗early stop renewal❗❗❗
+                🎊🎊🎊{self.monitor} renewaled🎊🎊🎊
                 {self.monitor} : {self.best}
                 """
                 )
 
         else:
-            if current > self.stop_line :
-                # + 추가 )patience 값 도달 전에 monitoring value 가 stop_line 보다 커지면 중단
-                self.wait = self.patience
+            # overfittiong_escaping 
+            bounce_count = 0
+            if current > self.overfitting_stop_line :
+                if self.overfitting_count > bounce_count:
+                    self.wait = self.patience
+                bounce_count += 1      
+                          
             self.wait += 1
             if self.wait >= self.patience:
                 self.stopped_epoch = epoch

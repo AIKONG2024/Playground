@@ -102,7 +102,7 @@ test_csv = scaler.transform(test_csv)
 
 print(x_train.shape)  # (77029, 13)
 print(y_train.shape)  # (77029, 7)
-es = CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', stop_line = 1.0, is_log = True)
+es = CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', overfitting_stop_line=1.0, overfitting_count = 30, is_log = True)
 
 build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
 
