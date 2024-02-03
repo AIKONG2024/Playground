@@ -2,7 +2,7 @@
 #  https://dacon.io/competitions/open/235610/mysubmission
 import sys
 sys.path.append("/Users/kongseon-eui/Documents/Workspace/AI_Project/modules")
-from custom_hyper_model import MulticlassClassificationModel
+from keras_custom_pk_pk.hyper_model import MulticlassClassificationModel
 
 from keras_tuner.tuners import Hyperband
 import numpy as np

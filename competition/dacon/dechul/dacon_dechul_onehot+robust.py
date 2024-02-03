@@ -9,8 +9,8 @@ from sklearn.metrics import f1_score
 from sklearn.linear_model import LogisticRegression
 import sys
 
-sys.path.append("c:/Playground/")
-from custom_pk.custom_file_name import csv_file_name, h5_file_name
+sys.path.append("C:/MyPackages/")
+from keras_custom_pk.file_name import csv_file_name, h5_file_name
 
 import pandas as pd
 import numpy as np

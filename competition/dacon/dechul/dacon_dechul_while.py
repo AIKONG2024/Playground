@@ -13,10 +13,10 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 import time
 
 # custom 모듈 import
-sys.path.append("c://Playground")
-from custom_pk.custom_hyper_model import MulticlassClassificationModel
-from custom_pk.custom_pk.custom_file_name import csv_file_name, h5_file_name
-from custom_pk.custom_callbacks import CustomEarlyStoppingAtLoss
+sys.path.append('C:/MyPackages/')
+from keras_custom_pk.hyper_model import MulticlassClassificationModel
+from keras_custom_pk.file_name import *
+from keras_custom_pk.callbacks import CustomEarlyStoppingAtLoss
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기
@@ -24,7 +24,6 @@ train_csv = pd.read_csv(path + "train.csv", index_col=0)
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
 submission_csv = pd.read_csv(path + "sample_submission.csv")
 
-# print(train_csv.head(25))
 def splits(s):
     return int(s.split()[0])
 

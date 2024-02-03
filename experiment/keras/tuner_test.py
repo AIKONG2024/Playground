@@ -17,7 +17,7 @@ x_train, x_test, y_train, y_test = train_test_split(x,y, shuffle=True, train_siz
 
 
 
-from custom_hyper_model import LeanerRegressionModel
+from keras_custom_pk_pk.hyper_model import LeanerRegressionModel
 build_model = LeanerRegressionModel(num_classes= 10, output_count=1)   
 from keras.callbacks import EarlyStopping
 es = [EarlyStopping(monitor='val_loss', mode='min', patience=100, restore_best_weights= True)]

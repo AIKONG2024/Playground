@@ -7,13 +7,13 @@ from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from keras_tuner.tuners import Hyperband
-from custom_hyper_model import MulticlassClassificationModel
+from keras_custom_pk_pk.hyper_model import MulticlassClassificationModel
 import sys
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # custom 모듈 import
-sys.path.append("c://Playground/")
-from custom_pk.custom_file_name import csv_file_name, h5_file_name
+sys.path.append("c:/MyPakages/")
+from keras_custom_pk_pk.file_name import csv_file_name, h5_file_name
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기

@@ -7,7 +7,7 @@ from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from keras_tuner.tuners import Hyperband
-from custom_hyper_model import MulticlassClassificationModel
+from keras_custom_pk_pk.hyper_model import MulticlassClassificationModel
 
 path = 'C:/_data/dacon/dechul/'
 #데이터 가져오기

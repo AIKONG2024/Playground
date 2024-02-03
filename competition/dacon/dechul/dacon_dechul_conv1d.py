@@ -13,8 +13,8 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # custom 모듈 import
-sys.path.append("c://Playground/")
-from custom_pk.custom_file_name import csv_file_name, h5_file_name
+sys.path.append("C:/MyPackages/")
+from keras_custom_pk.file_name import csv_file_name, h5_file_name
 
 # 1. 데이터
 # bring data

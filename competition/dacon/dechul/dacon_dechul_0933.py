@@ -12,9 +12,9 @@ import sys
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # custom 모듈 import
-sys.path.append("c://Playground/")
-from custom_hyper_model import MulticlassClassificationModel
-from custom_pk.custom_file_name import csv_file_name, h5_file_name
+sys.path.append("C:/MyPackages/")
+from keras_custom_pk.hyper_model import MulticlassClassificationModel
+from keras_custom_pk.file_name import csv_file_name, h5_file_name
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기
