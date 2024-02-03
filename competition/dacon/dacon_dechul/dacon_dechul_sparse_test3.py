@@ -10,12 +10,12 @@ from sklearn.linear_model import LogisticRegression
 import sys
 from keras.optimizers import Adam
 
-sys.path.append("c://Playground/experiment/keras/")
-# sys.path.append("c:/Playground/Playground/experiment/keras/") #122
-# sys.path.append("c:/Playground/experiment/keras/")#102
+sys.path.append("c://Playground/")
+# sys.path.append("c:/Playground/Playground/") #122
+# sys.path.append("c:/Playground/")#102
 
 
-from custom_file_name import csv_file_name, h5_file_name
+from custom_pk.custom_file_name import csv_file_name, h5_file_name
 
 import pandas as pd
 import numpy as np

@@ -1,6 +1,6 @@
 #-v1 2024.01.15 KONG SEONUI
 import pandas as pd
-from custom_file_name import csv_file_name
+from custom_pk.custom_file_name import csv_file_name
 
 def logging(path, log_numbers, ** parameters):
     for i in range(0, len(parameters.keys)):

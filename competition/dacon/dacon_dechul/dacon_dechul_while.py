@@ -13,10 +13,10 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 import time
 
 # custom 모듈 import
-sys.path.append("c://Playground/experiment/keras/")
-from custom_hyper_model import MulticlassClassificationModel
-from custom_file_name import csv_file_name, h5_file_name
-from custom_callbacks import CustomEarlyStoppingAtLoss
+sys.path.append("c://Playground")
+from custom_pk.custom_hyper_model import MulticlassClassificationModel
+from custom_pk.custom_pk.custom_file_name import csv_file_name, h5_file_name
+from custom_pk.custom_callbacks import CustomEarlyStoppingAtLoss
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기
@@ -102,7 +102,6 @@ test_csv = scaler.transform(test_csv)
 
 print(x_train.shape)  # (77029, 13)
 print(y_train.shape)  # (77029, 7)
-es = CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', overfitting_stop_line=1.0, overfitting_count = 30, is_log = True)
 
 build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
 
@@ -122,7 +121,7 @@ tuner.search(
     epochs=100000,
     batch_size=1000,
     validation_split=0.2,
-    callbacks=[es],
+    callbacks=[EarlyStopping(monitor="val_loss", mode="min", patience=2000, restore_best_weights=True)],
 )
 best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
 tuner.results_summary()
@@ -136,7 +135,9 @@ while 1 :
         batch_size=randbatch,
         verbose=0,
         validation_split=0.2,
-        callbacks=[es],
+        callbacks=[
+            CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', overfitting_stop_line=1.0, overfitting_count = 30, is_log = True)
+            ],
     )
 
     # 평가, 예측

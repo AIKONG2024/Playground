@@ -12,8 +12,8 @@ import sys
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # custom 모듈 import
-sys.path.append("c://Playground/experiment/keras/")
-from custom_file_name import csv_file_name, h5_file_name
+sys.path.append("c://Playground/")
+from custom_pk.custom_file_name import csv_file_name, h5_file_name
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기
