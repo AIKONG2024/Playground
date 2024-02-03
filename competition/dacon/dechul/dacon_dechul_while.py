@@ -24,6 +24,9 @@ train_csv = pd.read_csv(path + "train.csv", index_col=0)
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
 submission_csv = pd.read_csv(path + "sample_submission.csv")
 
+# print(train_csv.head(25))
+
+
 def splits(s):
     return int(s.split()[0])
 
@@ -93,14 +96,10 @@ from sklearn.preprocessing import (
 # scaler = StandardScaler()
 # scaler = MaxAbsScaler()
 scaler = RobustScaler()
-
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 test_csv = scaler.transform(test_csv)
-
-print(x_train.shape)  # (77029, 13)
-print(y_train.shape)  # (77029, 7)
 
 build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
 
@@ -135,7 +134,7 @@ while 1 :
         verbose=0,
         validation_split=0.2,
         callbacks=[
-            CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', overfitting_stop_line=1.0, overfitting_count = 30, is_log = True)
+            CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', overfitting_stop_line=1.0, overfitting_count = 37, is_log = True)
             ],
     )
 
