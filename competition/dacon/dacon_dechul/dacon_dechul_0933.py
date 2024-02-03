@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -70,107 +71,107 @@ x = train_csv.drop("대출등급", axis=1)
 y = train_csv["대출등급"]
 
 from sklearn.preprocessing import OneHotEncoder
-while 1 :
-    # randbatch = np.random.randint(100, 1200)
-    randbatch = 1000
-    # rand_state = np.random.randint(777, 7777)
-    rand_state = 1234
-    
-    # 데이터 분류
-    x_train, x_test, y_train, y_test = train_test_split(
-        x, y, train_size=0.80, random_state=rand_state, stratify=y
-    )
-    print(np.unique(y_test, return_counts=True))
 
-    from sklearn.preprocessing import (
-        MinMaxScaler,
-        MaxAbsScaler,
-        StandardScaler,
-        RobustScaler,
-    )
+# randbatch = np.random.randint(100, 1200)
+randbatch = 1000
+# rand_state = np.random.randint(777, 7777)
+rand_state = 1234
 
-    # scaler = MinMaxScaler()
-    # scaler = StandardScaler()
-    # scaler = MaxAbsScaler()
-    scaler = RobustScaler()
+# 데이터 분류
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, train_size=0.80, random_state=rand_state, stratify=y
+)
+print(np.unique(y_test, return_counts=True))
 
-    scaler.fit(x_train)
-    x_train = scaler.transform(x_train)
-    x_test = scaler.transform(x_test)
-    test_csv = scaler.transform(test_csv)
+from sklearn.preprocessing import (
+    MinMaxScaler,
+    MaxAbsScaler,
+    StandardScaler,
+    RobustScaler,
+)
 
-    print(x_train.shape)  # (77029, 13)
-    print(y_train.shape)  # (77029, 7)
-    es = EarlyStopping(
-        monitor="val_loss", mode="min", patience=3000, restore_best_weights=True
-    )
-    build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
+# scaler = MinMaxScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
 
-    tuner = Hyperband(
-        build_model,
-        objective="val_loss",
-        max_epochs=1000,
-        factor=3,
-        executions_per_trial=1,
-        directory="C:\_data\dacon\dechul\\",
-        project_name="hyperband",
-    )
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+test_csv = scaler.transform(test_csv)
 
-    tuner.search(
-        x_train,
-        y_train,
-        epochs=100000,
-        batch_size=1000,
-        validation_split=0.2,
-        callbacks=[es],
-    )
-    best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
-    tuner.results_summary()
-    model = tuner.hypermodel.build(best_hps)
+print(x_train.shape)  # (77029, 13)
+print(y_train.shape)  # (77029, 7)
+es = EarlyStopping(
+    monitor="val_loss", mode="min", patience=2000, restore_best_weights=True
+)
+build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
 
-    history = model.fit(
-        x_train,
-        y_train,
-        epochs=100000,
-        batch_size=randbatch,
-        verbose=1,
-        validation_split=0.2,
-        callbacks=[es],
-    )
+tuner = Hyperband(
+    build_model,
+    objective="val_loss",
+    max_epochs=1000,
+    factor=3,
+    executions_per_trial=1,
+    directory="C:\_data\dacon\dechul\\",
+    project_name="hyperband",
+)
 
-    # 평가, 예측
-    loss = model.evaluate(x_test, y_test)
-    y_predict = model.predict(x_test)
-    arg_y_predict = np.argmax(y_predict, axis=1)
-    f1 = f1_score(y_test, arg_y_predict, average="macro")
+tuner.search(
+    x_train,
+    y_train,
+    epochs=100000,
+    batch_size=1000,
+    validation_split=0.2,
+    callbacks=[es],
+)
+best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
+tuner.results_summary()
+model = tuner.hypermodel.build(best_hps)
 
-    # ==========================confirm score========================================
-    print("=" * 100)
-    print("loss : ", loss)
-    print("f1_score :", f1)
-    print("=" * 100)
+history = model.fit(
+    x_train,
+    y_train,
+    epochs=100000,
+    batch_size=randbatch,
+    verbose=1,
+    validation_split=0.2,
+    callbacks=[es],
+)
 
+# 평가, 예측
+loss = model.evaluate(x_test, y_test)
+y_predict = model.predict(x_test)
+arg_y_predict = np.argmax(y_predict, axis=1)
+f1 = f1_score(y_test, arg_y_predict, average="macro")
 
-    # ============================store Data===========================================
-    submission = np.argmax(model.predict(test_csv), axis=1)
-    submission = lbe.inverse_transform(submission)
-    submission_csv["대출등급"] = submission
-    file_name = csv_file_name(
-        path, f"sampleSubmission_loss_{loss[0]:04f}_f1_{f1:04f}_"
-    )
-    submission_csv.to_csv(file_name, index=False)
-    h5_file_name_d = h5_file_name(path, f"dechulModel_loss_{loss[0]:04f}_f1_{f1:04f}_batch_{randbatch}_rans_state_{rand_state}_")
-    model.save(h5_file_name_d)
-    
-    
+# ==========================confirm score========================================
+print("=" * 100)
+print("loss : ", loss)
+print("f1_score :", f1)
+print("=" * 100)
 
 
-    # =============================visualization=======================================
-    # import matplotlib.pyplot as plt
+# ============================store Data===========================================
+submission = np.argmax(model.predict(test_csv), axis=1)
+submission = lbe.inverse_transform(submission)
+submission_csv["대출등급"] = submission
+file_name = csv_file_name(
+    path, f"sampleSubmission_loss_{loss[0]:04f}_f1_{f1:04f}_"
+)
+submission_csv.to_csv(file_name, index=False)
+h5_file_name_d = h5_file_name(path, f"dechulModel_loss_{loss[0]:04f}_f1_{f1:04f}_batch_{randbatch}_rans_state_{rand_state}_")
+model.save(h5_file_name_d)
 
-    # plt.figure(figsize=(9, 6))
-    # plt.plot(history.history["val_loss"], color="red", label="val_loss", marker=".")
-    # plt.plot(history.history["val_acc"], color="blue", label="val_acc", marker=".")
-    # plt.xlabel = "epochs"
-    # plt.ylabel = "loss"
-    # plt.show()
+
+
+
+# =============================visualization=======================================
+# import matplotlib.pyplot as plt
+
+# plt.figure(figsize=(9, 6))
+# plt.plot(history.history["val_loss"], color="red", label="val_loss", marker=".")
+# plt.plot(history.history["val_acc"], color="blue", label="val_acc", marker=".")
+# plt.xlabel = "epochs"
+# plt.ylabel = "loss"
+# plt.show()

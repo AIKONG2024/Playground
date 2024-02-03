@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -9,11 +10,13 @@ from sklearn.metrics import f1_score
 from keras_tuner.tuners import Hyperband
 import sys
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+import time
 
 # custom 모듈 import
 sys.path.append("c://Playground/experiment/keras/")
 from custom_hyper_model import MulticlassClassificationModel
 from custom_file_name import csv_file_name, h5_file_name
+from custom_callbacks import CustomEarlyStoppingAtLoss
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기
@@ -22,8 +25,6 @@ test_csv = pd.read_csv(path + "test.csv", index_col=0)
 submission_csv = pd.read_csv(path + "sample_submission.csv")
 
 # print(train_csv.head(25))
-
-
 def splits(s):
     return int(s.split()[0])
 
@@ -70,70 +71,70 @@ x = train_csv.drop("대출등급", axis=1)
 y = train_csv["대출등급"]
 
 from sklearn.preprocessing import OneHotEncoder
+
+# randbatch = np.random.randint(100, 1200)
+randbatch = 1000
+# rand_state = np.random.randint(777, 7777)
+rand_state = 1234
+
+# 데이터 분류
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, train_size=0.80, random_state=rand_state, stratify=y
+)
+print(np.unique(y_test, return_counts=True))
+
+from sklearn.preprocessing import (
+    MinMaxScaler,
+    MaxAbsScaler,
+    StandardScaler,
+    RobustScaler,
+)
+
+# scaler = MinMaxScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
+
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+test_csv = scaler.transform(test_csv)
+
+print(x_train.shape)  # (77029, 13)
+print(y_train.shape)  # (77029, 7)
+es = CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', stop_line = 1.0, is_log = True)
+
+build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
+
+tuner = Hyperband(
+    build_model,
+    objective="val_loss",
+    max_epochs=1000,
+    factor=3,
+    executions_per_trial=1,
+    directory="C:\_data\dacon\dechul\\",
+    project_name="hyperband",
+)
+
+tuner.search(
+    x_train,
+    y_train,
+    epochs=100000,
+    batch_size=1000,
+    validation_split=0.2,
+    callbacks=[es],
+)
+best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
+tuner.results_summary()
+model = tuner.hypermodel.build(best_hps)
+
 while 1 :
-    # randbatch = np.random.randint(100, 1200)
-    randbatch = 1000
-    # rand_state = np.random.randint(777, 7777)
-    rand_state = 1234
-    
-    # 데이터 분류
-    x_train, x_test, y_train, y_test = train_test_split(
-        x, y, train_size=0.80, random_state=rand_state, stratify=y
-    )
-    print(np.unique(y_test, return_counts=True))
-
-    from sklearn.preprocessing import (
-        MinMaxScaler,
-        MaxAbsScaler,
-        StandardScaler,
-        RobustScaler,
-    )
-
-    # scaler = MinMaxScaler()
-    # scaler = StandardScaler()
-    # scaler = MaxAbsScaler()
-    scaler = RobustScaler()
-
-    scaler.fit(x_train)
-    x_train = scaler.transform(x_train)
-    x_test = scaler.transform(x_test)
-    test_csv = scaler.transform(test_csv)
-
-    print(x_train.shape)  # (77029, 13)
-    print(y_train.shape)  # (77029, 7)
-    es = EarlyStopping(
-        monitor="val_loss", mode="min", patience=3000, restore_best_weights=True
-    )
-    build_model = MulticlassClassificationModel(num_classes=0, output_count=7)
-
-    tuner = Hyperband(
-        build_model,
-        objective="val_loss",
-        max_epochs=1000,
-        factor=3,
-        executions_per_trial=1,
-        directory="C:\_data\dacon\dechul\\",
-        project_name="hyperband",
-    )
-
-    tuner.search(
-        x_train,
-        y_train,
-        epochs=100000,
-        batch_size=1000,
-        validation_split=0.2,
-        callbacks=[es],
-    )
-    best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
-    tuner.results_summary()
-    model = tuner.hypermodel.build(best_hps)
-
     history = model.fit(
         x_train,
         y_train,
         epochs=100000,
         batch_size=randbatch,
-        verbose=1,
+        verbose=0,
         validation_split=0.2,
         callbacks=[es],
     )
@@ -161,9 +162,6 @@ while 1 :
     submission_csv.to_csv(file_name, index=False)
     h5_file_name_d = h5_file_name(path, f"dechulModel_loss_{loss[0]:04f}_f1_{f1:04f}_batch_{randbatch}_rans_state_{rand_state}_")
     model.save(h5_file_name_d)
-    
-    
-
 
     # =============================visualization=======================================
     # import matplotlib.pyplot as plt
