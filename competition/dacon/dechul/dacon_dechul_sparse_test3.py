@@ -105,6 +105,8 @@ submission_csv = pd.read_csv(path + "sample_submission.csv")
 lbe = LabelEncoder()
 # 주택소유상태
 train_csv["주택소유상태"] = lbe.fit_transform(train_csv["주택소유상태"])
+if "ANY" not in lbe.classes_:
+    lbe.classes_ = np.append(lbe.classes_, "ANY")
 test_csv["주택소유상태"] = lbe.transform(test_csv["주택소유상태"])
 # 대출목적
 train_csv["대출목적"] = lbe.fit_transform(train_csv["대출목적"])

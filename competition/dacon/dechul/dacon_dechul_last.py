@@ -15,6 +15,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 sys.path.append("C:/MyPackages/")
 from keras_custom_pk.hyper_model import MulticlassClassificationModel
 from keras_custom_pk.file_name import csv_file_name, h5_file_name
+from keras_custom_pk.callbacks import CustomEarlyStoppingAtLoss
 
 path = "C:/_data/dacon/dechul/"
 # 데이터 가져오기
@@ -79,10 +80,10 @@ y = train_csv["대출등급"]
 
 from sklearn.preprocessing import OneHotEncoder
 while 1 :
-    # randbatch = np.random.randint(100, 1200)
-    randbatch = 1000
-    # rand_state = np.random.randint(777, 7777)
-    rand_state = 1234
+    randbatch = np.random.randint(800, 1200)
+    # randbatch = 1000
+    rand_state = np.random.randint(777, 7777)
+    # rand_state = 1234
 
     # 데이터 분류
     x_train, x_test, y_train, y_test = train_test_split(
@@ -143,7 +144,7 @@ while 1 :
         batch_size=randbatch,
         verbose=2,
         validation_split=0.2,
-        callbacks=[es],
+        callbacks=[CustomEarlyStoppingAtLoss(patience=2000, monitor="val_loss", overfitting_stop_line=1.0, overfitting_count = 30, is_log=True)]
     )
 
     # 평가, 예측
