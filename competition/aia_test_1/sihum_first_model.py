@@ -8,7 +8,7 @@ from keras_custom_pk.hyper_model import MulticlassClassificationModel
 from keras_custom_pk.file_name import *
 from keras_custom_pk.callbacks import CustomEarlyStoppingAtLoss
 
-time_steps = 5
+time_steps = 30
 behind_size = 2 
 compare_predict_size = 10
 
@@ -52,8 +52,8 @@ amore_csv = pd.read_csv(path + "아모레 240205.csv", encoding='cp949', thousan
 
 # ===========================================================================
 # 데이터 일자 이후 자르기
-samsung_csv = samsung_csv[samsung_csv.index > "2015/08/29"]
-amore_csv = amore_csv[amore_csv.index > "2015/08/29"]
+samsung_csv = samsung_csv[samsung_csv.index > "2020/03/23"]
+amore_csv = amore_csv[amore_csv.index > "2020/03/23"]
 
 print(samsung_csv.columns)
 # ['시가', '고가', '저가', '종가', '전일비', 'Unnamed: 6', '등락률', '거래량', '금액(백만)',
@@ -141,10 +141,14 @@ s_input = Input(shape=(time_steps, 16, 1))
 s_layer_1 =  ConvLSTM1D(filters=32, kernel_size=2)(s_input)
 s_mp_layer = MaxPooling1D(2)(s_layer_1)
 s_flatter = Flatten()(s_mp_layer)
-s_layer_2 = Dense(32,activation='relu')(s_flatter)
-s_layer_3 = Dense(32, activation='relu')(s_layer_2)
-s_layer_4 = Dense(32, activation="relu")(s_layer_3)
-s_output = Dense(16)(s_layer_4)
+s_layer_2 = Dense(16,activation='relu')(s_flatter)
+s_layer_3 = Dense(16,activation='relu')(s_layer_2)
+s_layer_4 = Dense(16,activation='relu')(s_layer_3)
+s_layer_5 = Dense(16,activation='relu')(s_layer_4)
+s_layer_6 = Dense(16,activation='relu')(s_layer_5)
+s_layer_7 = Dense(16, activation='relu')(s_layer_6)
+s_layer_8 = Dense(16, activation="relu")(s_layer_7)
+s_output = Dense(16)(s_layer_8)
 
 # ============================================================================
 #모델 아모레퍼시픽
@@ -154,25 +158,39 @@ a_mp_layer = MaxPooling1D(2)(a_layer_1)
 a_flatter = Flatten()(a_mp_layer)
 a_layer_2 = Dense(16, activation='relu')(a_flatter)
 a_layer_3 = Dense(16, activation='relu')(a_layer_2)
-a_layer_4 = Dense(32, activation='relu')(a_layer_3)
-a_output = Dense(16)(a_layer_4)
+a_layer_4 = Dense(16, activation='relu')(a_layer_3)
+a_layer_5 = Dense(16, activation='relu')(a_layer_4)
+a_layer_6 = Dense(16, activation='relu')(a_layer_5)
+a_layer_7 = Dense(16, activation='relu')(a_layer_6)
+a_layer_8 = Dense(16, activation='relu')(a_layer_7)
+a_layer_9 = Dense(16, activation='relu')(a_layer_8)
+a_layer_10 = Dense(16, activation='relu')(a_layer_9)
+a_layer_11 = Dense(16, activation='relu')(a_layer_10)
+a_output = Dense(16)(a_layer_11)
 
 # ============================================================================
 #merge 1
 m1_layer_1 = concatenate([s_output, a_output])
-m1_layer_2 = Dense(32)(m1_layer_1)
-m1_layer_3 = Dense(32)(m1_layer_2)
-m1_layer_4 = Dense(32)(m1_layer_3)
-m1_layer_5 = Dense(32)(m1_layer_4)
-m1_last_output = Dense(1)(m1_layer_5)
+m1_layer_2 = Dense(16)(m1_layer_1)
+m1_layer_3 = Dense(4)(m1_layer_2)
+m1_layer_4 = Dense(16)(m1_layer_3)
+m1_layer_5 = Dense(16)(m1_layer_4)
+m1_layer_6 = Dense(16)(m1_layer_5)
+m1_layer_7 = Dense(16)(m1_layer_6)
+m1_layer_8 = Dense(16)(m1_layer_7)
+m1_layer_9 = Dense(16)(m1_layer_8)
+m1_last_output = Dense(1)(m1_layer_9)
 
 # ============================================================================
 #merge 2
 m2_layer_1 = concatenate([s_output, a_output]) 
-m2_layer_2 = Dense(32)(m2_layer_1)
-m2_layer_3 = Dense(32)(m2_layer_2)
-m2_layer_4 = Dense(32)(m2_layer_3)
-m2_layer_5 = Dense(32)(m2_layer_4)
+m2_layer_2 = Dense(16)(m2_layer_1)
+m2_layer_3 = Dense(16)(m2_layer_2)
+m2_layer_4 = Dense(16)(m2_layer_3)
+m2_layer_5 = Dense(16)(m2_layer_4)
+m2_layer_6 = Dense(16)(m2_layer_5)
+m2_layer_7 = Dense(16)(m2_layer_6)
+m2_layer_8 = Dense(16)(m2_layer_7)
 m2_last_output = Dense(1)(m2_layer_5)
 
 # ============================================================================
@@ -182,58 +200,61 @@ model = Model(inputs = [s_input, a_input], outputs = [m1_last_output, m2_last_ou
 # ============================================================================
 # 3. 컴파일 훈련
 model.compile(loss='mae', optimizer='adam')
+while 1 : 
+    model.fit(
+            [s_x_train, a_x_train],
+            [s_y_train, a_y_train],
+            epochs=100000,
+            batch_size=5000,
+            verbose=0,
+            callbacks=[
+                CustomEarlyStoppingAtLoss(
+                    patience=2000,
+                    monitor="loss",
+                    overfitting_stop_line=4000,
+                    overfitting_count=400,
+                    stop_tranning_epoch=100,
+                    stop_tranning_value=30000,
+                    is_log=True,
+                )
+            ],
+        )
 
-model.fit(
-        [s_x_train, a_x_train],
-        [s_y_train, a_y_train],
-        epochs=100000,
-        batch_size=5000,
-        verbose=0,
-        callbacks=[
-            CustomEarlyStoppingAtLoss(
-                patience=2000,
-                monitor="loss",
-                overfitting_stop_line=10000000,
-                overfitting_count=100,
-                stop_tranning_epoch=100,
-                stop_tranning_value=30000,
-                is_log=True,
-            )
-        ],
-    )
+    # 4. 평가 예측
+    # ============================================================================
+    # evaluate 평가, r2 스코어
+    loss = model.evaluate([s_x_test, a_x_test], [s_y_test, a_y_test])
+    predict = model.predict([s_x_test, a_x_test])
+    s_r2 = r2_score(s_y_test, predict[0])
+    a_r2 = r2_score(a_y_test, predict[1])
+    print("="*100)
+    print(f"삼성 loss : {loss[0]} / 아모레 loss : {loss[1]} / 합계 loss : {loss[2]}" )
+    print(f"삼성 r2 : {s_r2} / 아모레 r2 : {a_r2}")
+    print("="*100)
 
-# 4. 평가 예측
-# ============================================================================
-# evaluate 평가, r2 스코어
-loss = model.evaluate([s_x_test, a_x_test], [s_y_test, a_y_test])
-print("loss :", loss)
-predict = model.predict([s_x_test, a_x_test])
-s_r2 = r2_score(s_y_test, predict[0])
-a_r2 = r2_score(a_y_test, predict[1])
-print(f"삼성 r2 : {s_r2} / 아모레 r2 : {a_r2}")
+    # ============================================================================
+    # 최근 실제 값과 비교 (compare_predict_size = ?)
+    sample_dataset_y = [samsung_sample_y,amore_sample_y]
+    sample_predict_x = model.predict([
+        samsung_sample_x.reshape(samsung_sample_x.shape[0], samsung_sample_x.shape[1], samsung_sample_x.shape[2], 1), 
+        amore_sample_x.reshape(amore_sample_x.shape[0], amore_sample_x.shape[1],amore_sample_x.shape[2],1)
+    ])
 
-# ============================================================================
-# 최근 실제 값과 비교 (compare_predict_size = ?)
-sample_dataset_y = [samsung_sample_y,amore_sample_y]
-sample_predict_x = model.predict([
-    samsung_sample_x.reshape(samsung_sample_x.shape[0], samsung_sample_x.shape[1], samsung_sample_x.shape[2], 1), 
-    amore_sample_x.reshape(amore_sample_x.shape[0], amore_sample_x.shape[1],amore_sample_x.shape[2],1)
-])
+    print("="*100)
+    for i in range(len(sample_dataset_y)):
+        if i == 0 :
+            print("\t\tSAMSUNG\t시가")
+        else:
+            print("="*100)
+            print("\t\tAMORE\t종가")
+        for j in range(compare_predict_size):
+            print(f"\tD-{compare_predict_size - j  - 1}: {sample_dataset_y[i][j]}\t예측값 {sample_predict_x[i][j]}\t")
+    print("="*100)
 
-print("="*100)
-for i in range(len(sample_dataset_y)):
-    if i == 0 :
-        print("\t\tSAMSUNG\t시가")
-    else:
-        print("="*100)
-        print("\t\tAMORE\t종가")
-    for j in range(compare_predict_size):
-        print(f"\tD-{compare_predict_size - j  - 1}: {sample_dataset_y[i][j]}\t예측값 {sample_predict_x[i][j]}\t")
-print("="*100)
-
-# ============================================================================
-# .h5 file 저장
-if loss[0] < 30000:
-    h_path = "C:/_data/sihum/save_weight/"
-    h5_file_name_d = h5_file_name(h_path , f"save_weight_samsung_loss_{np.round(loss[0])}_amore_loss_{np.round(loss[1])}_concat_loss_{np.round(loss[2])}_")
-    model.save(h5_file_name_d)
+    # ============================================================================
+    # .h5 file 저장
+    if loss[0] < 6000:
+        h_path = "C:/_data/sihum/save_weight/"
+        h5_file_name_d = h5_file_name(h_path , f"save_weight_samsung_loss_{np.round(loss[0])}_amore_loss_{np.round(loss[1])}_concat_loss_{np.round(loss[2])}_")
+        model.save(h5_file_name_d)
+        break
