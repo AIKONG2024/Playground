@@ -2,10 +2,6 @@ import pandas as pd
 import numpy as np
 import time
 import sys
-sys.path.append('C:/MyPackages/')
-from keras_custom_pk.hyper_model import MulticlassClassificationModel
-from keras_custom_pk.file_name import *
-from keras_custom_pk.callbacks import CustomEarlyStoppingAtLoss
 
 time_steps = 5
 behind_size = 2 
@@ -23,24 +19,6 @@ def split_xy(dataFrame, cutting_size, y_behind_size,  y_column):
     print("spliting time : ", np.round(split_end_time - split_start_time, 2),  "sec")
     return (np.array(xs), np.array(ys).reshape(-1,1))
 
-'''
-전처리 note 
-===================================
-삼성
- 
-2015/08/30 이후 데이터 사용
-7일
-30일
-
-===================================
-아모레 
-
-2020/03/23 이후 데이터 사용
-7일
-30일
-
-===================================
-'''
 # ===========================================================================
 # 데이터 저장
 path = "C:/_data/sihum/"
@@ -109,14 +87,6 @@ amore_scaler = MinMaxScaler()
 r_a_x_train = amore_scaler.fit_transform(r_a_x_train)
 r_a_x_test = amore_scaler.transform(r_a_x_test)
 r_amore_sample_x = amore_scaler.transform(r_amore_sample_x)
-
-
-# s_x_train = s_x_train.reshape(-1, s_x_train_shape_1, s_x_train_shape_2)
-# s_x_test = s_x_test.reshape(-1, s_x_test_shape_1, s_x_test_shape_2)
-# a_x_train = a_x_train.reshape(-1, a_x_train_shape_1, a_x_train_shape_2)
-# a_x_test = a_x_test.reshape(-1, a_x_test_shape_1, a_x_test_shape_2)
-print(s_x_train.shape)
-print(r_s_x_train.shape)
 s_x_train = r_s_x_train.reshape(-1, s_x_train.shape[1], s_x_train.shape[2], 1)
 s_x_test = r_s_x_test.reshape(-1, s_x_test.shape[1], s_x_test.shape[2], 1)
 a_x_train = r_a_x_train.reshape(-1, a_x_train.shape[1], a_x_train.shape[2], 1)
@@ -143,17 +113,7 @@ a_r2 = r2_score(a_y_test, predict[1])
 print(f"삼성 r2 : {s_r2} / 아모레 r2 : {a_r2}")
 
 # ============================================================================
-sample_dataset_y = [samsung_sample_y,amore_sample_y]
-sample_dataset_pred = model.predict([
-    samsung_sample_x.reshape(samsung_sample_x.shape[0], samsung_sample_x.shape[1], samsung_sample_x.shape[2], 1), 
-    amore_sample_x.reshape(amore_sample_x.shape[0], amore_sample_x.shape[1],amore_sample_x.shape[2],1)])
-for i in range(2):
-    if i == 0 :
-        print("SAMSUNG 시가=========================================================")
-    else:
-        print("AMORE 종가===========================================================")
-    for j in range(5):
-        print(f"실제값: {sample_dataset_y[i][j]} \t 예측값 {sample_dataset_pred[i][j]}")
+print(f"삼성전자 2월 7일 시가 [{}]")
 print("=====================================================================")
 
 # loss : [645219.5625, 565802.375, 79417.1953125]
