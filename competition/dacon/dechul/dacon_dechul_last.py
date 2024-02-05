@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -79,7 +78,7 @@ from sklearn.preprocessing import OneHotEncoder
 # randbatch = np.random.randint(100, 1200)
 randbatch = 1000
 # rand_state = np.random.randint(777, 7777)
-rand_state = 1234
+rand_state = 119
 
 # 데이터 분류
 x_train, x_test, y_train, y_test = train_test_split(
@@ -127,7 +126,7 @@ best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
 tuner.results_summary()
 model = tuner.hypermodel.build(best_hps)
 # build_model.fit(best_hps, model, x_train, y_train, epochs=2000)
-    
+
 while 1 :
     history = model.fit(
         x_train,
@@ -137,9 +136,17 @@ while 1 :
         verbose=2,
         validation_split=0.2,
         callbacks=[
-            CustomEarlyStoppingAtLoss(patience=2000, monitor='val_loss', overfitting_stop_line=1.0, overfitting_count = 30, stop_tranning_epoch = 50, stop_tranning_value = 0.40 , is_log = True)
+            CustomEarlyStoppingAtLoss(
+                patience=2000,
+                monitor="val_loss",
+                overfitting_stop_line=1.5,
+                overfitting_count=30,
+                stop_tranning_epoch=100,
+                stop_tranning_value=0.18,
+                is_log=True,
+            )
             # EarlyStopping(monitor="val_loss", mode="min", patience=3000, restore_best_weights=True)
-            ],
+        ],
     )
 
     # 평가, 예측
@@ -153,7 +160,6 @@ while 1 :
     print("loss : ", loss)
     print("f1_score :", f1)
     print("=" * 100)
-
 
     # ============================store Data===========================================
     if f1 > 0.92 :
