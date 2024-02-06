@@ -8,7 +8,7 @@ from keras_custom_pk.hyper_model import MulticlassClassificationModel
 from keras_custom_pk.file_name import *
 from keras_custom_pk.callbacks import CustomEarlyStoppingAtLoss
 
-time_steps = 30
+time_steps = 180
 behind_size = 2 
 compare_predict_size = 10
 
@@ -93,8 +93,8 @@ amore_sample_y = np.append(amore_y[-compare_predict_size + 2:], ["24/02/06 종�
 # ============================================================================
 # 데이터셋 나누기
 from sklearn.model_selection import train_test_split
-s_x_train, s_x_test, s_y_train, s_y_test = train_test_split(samsung_x,samsung_y, train_size=0.8, shuffle=False, random_state=1234)
-a_x_train, a_x_test, a_y_train, a_y_test = train_test_split(amore_x,amore_y, train_size=0.8, shuffle=False, random_state=1234)
+s_x_train, s_x_test, s_y_train, s_y_test = train_test_split(samsung_x,samsung_y, train_size=0.8, shuffle=True, random_state=1234)
+a_x_train, a_x_test, a_y_train, a_y_test = train_test_split(amore_x,amore_y, train_size=0.8, shuffle=True, random_state=1234)
 
 # ============================================================================
 # 스케일링
@@ -180,18 +180,19 @@ m1_layer_7 = Dense(16)(m1_layer_6)
 m1_layer_8 = Dense(16)(m1_layer_7)
 m1_layer_9 = Dense(16)(m1_layer_8)
 m1_last_output = Dense(1)(m1_layer_9)
+m2_last_output = Dense(1)(m1_layer_9)
 
-# ============================================================================
-#merge 2
-m2_layer_1 = concatenate([s_output, a_output]) 
-m2_layer_2 = Dense(16)(m2_layer_1)
-m2_layer_3 = Dense(16)(m2_layer_2)
-m2_layer_4 = Dense(16)(m2_layer_3)
-m2_layer_5 = Dense(16)(m2_layer_4)
-m2_layer_6 = Dense(16)(m2_layer_5)
-m2_layer_7 = Dense(16)(m2_layer_6)
-m2_layer_8 = Dense(16)(m2_layer_7)
-m2_last_output = Dense(1)(m2_layer_5)
+# # ============================================================================
+# #merge 2
+# m2_layer_1 = concatenate([s_output, a_output]) 
+# m2_layer_2 = Dense(16)(m2_layer_1)
+# m2_layer_3 = Dense(16)(m2_layer_2)
+# m2_layer_4 = Dense(16)(m2_layer_3)
+# m2_layer_5 = Dense(16)(m2_layer_4)
+# m2_layer_6 = Dense(16)(m2_layer_5)
+# m2_layer_7 = Dense(16)(m2_layer_6)
+# m2_layer_8 = Dense(16)(m2_layer_7)
+# m2_last_output = Dense(1)(m2_layer_5)
 
 # ============================================================================
 #model 정의
@@ -205,7 +206,7 @@ while 1 :
             [s_x_train, a_x_train],
             [s_y_train, a_y_train],
             epochs=100000,
-            batch_size=5000,
+            batch_size=2000,
             verbose=0,
             callbacks=[
                 CustomEarlyStoppingAtLoss(
@@ -253,7 +254,7 @@ while 1 :
 
     # ============================================================================
     # .h5 file 저장
-    if loss[0] < 6000:
+    if loss[0] < 45000:
         h_path = "C:/_data/sihum/save_weight/"
         h5_file_name_d = h5_file_name(h_path , f"save_weight_samsung_loss_{np.round(loss[0])}_amore_loss_{np.round(loss[1])}_concat_loss_{np.round(loss[2])}_")
         model.save(h5_file_name_d)
