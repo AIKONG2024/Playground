@@ -147,7 +147,8 @@ from keras.callbacks import EarlyStopping
 # ============================================================================
 #모델 삼성
 s_input = Input(shape=(time_steps, len(samsung_csv.columns)))
-s_layer_2 = LSTM(32)(s_input)
+s_layer_1 = LSTM(32)(s_input)
+s_layer_2 = Dense(16,activation='relu')(s_layer_1)
 s_layer_3 = Dense(16,activation='relu')(s_layer_2)
 s_layer_4 = Dense(16,activation='relu')(s_layer_3)
 s_layer_5 = Dense(16,activation='relu')(s_layer_4)
@@ -283,7 +284,7 @@ while 1 :
 
     # ============================================================================
     # .h5 file 저장
-    if 73400 < sample_predict_x[0][len(sample_predict_x)-1] <74200 and 123500 < sample_predict_x[1][len(sample_predict_x)-1] <128000  :
+    if 73400 < sample_predict_x[0][compare_predict_size-1] <74200 and 123500 < sample_predict_x[1][compare_predict_size-1] <128000  :
         h_path = "C:/_data/sihum/save_weight/"
         h5_file_name_d = h5_file_name(h_path , f"save_model_samsung_{sample_predict_x[0][len(sample_predict_x)-1]}_amore_{sample_predict_x[1][len(sample_predict_x)-1]}_")
         model.save(h5_file_name_d)
