@@ -5,6 +5,7 @@ from sklearn.metrics import r2_score
 from keras.models import load_model
 import random as rn
 import tensorflow as tf
+
 rn.seed(333)
 tf.random.set_seed(123)
 np.random.seed(321)
@@ -25,25 +26,6 @@ def split_xy(dataFrame, cutting_size, y_behind_size,  y_column):
     split_end_time = time.time()
     print("spliting time : ", np.round(split_end_time - split_start_time, 2),  "sec")
     return (np.array(xs), np.array(ys).reshape(-1,1))
-
-'''
-전처리 note 
-===================================
-삼성
- 
-2015/08/30 이후 데이터 사용
-7일
-30일
-
-===================================
-아모레 
-
-2020/03/23 이후 데이터 사용
-7일
-30일
-
-===================================
-'''
 
 # ===========================================================================
 # 1. 데이터
@@ -119,26 +101,24 @@ amore_sample_x = r_amore_sample_x.reshape(-1, amore_sample_x.shape[1], amore_sam
 
 # ============================================================================
 # 모델 불러오기
-h_path = "C:/_data/sihum/save_weight/"
-h5_filename = "save_model_samsung_[74502.805]_amore_[120909.74]_20242620412.h5"
-model = load_model(h_path + h5_filename)
+h5_filename = "save_model_samsung_[74502.81]_amore_[120909.74]_20242620412.h5"
+model = load_model(path + h5_filename)
 
 # 4. 평가 예측
 # ============================================================================
 # evaluate 평가, r2 스코어
-loss = model.evaluate([s_x_test, a_x_test], [s_y_test, a_y_test])
-predict = model.predict([s_x_test, a_x_test])
+loss = model.evaluate([s_x_test, a_x_test], [s_y_test, a_y_test], verbose = 0)
+predict = model.predict([s_x_test, a_x_test], verbose = 0)
 s_r2 = r2_score(s_y_test, predict[0])
 a_r2 = r2_score(a_y_test, predict[1])
 print("="*100)
-print(f"합계 loss : {loss[0]} / 삼성 loss : {loss[1]} / 아모레 loss : {loss[2]}" )
-print(f"삼성 r2 : {s_r2} / 아모레 r2 : {a_r2}")
-print("="*100)
+print(f"\t합계 loss : {loss[0]} / 삼성 loss : {loss[1]} / 아모레 loss : {loss[2]}" )
+print(f"\t삼성 r2 : {s_r2} / 아모레 r2 : {a_r2}")
 
 # ============================================================================
 # 최근 실제 값과 비교 (compare_predict_size = ?)
 sample_dataset_y = [samsung_sample_y,amore_sample_y]
-sample_predict_x = model.predict([samsung_sample_x, amore_sample_x])
+sample_predict_x = model.predict([samsung_sample_x, amore_sample_x], verbose = 0)
 
 print("="*100)
 for i in range(len(sample_dataset_y)):
@@ -148,5 +128,5 @@ for i in range(len(sample_dataset_y)):
         print("="*100)
         print("\t\tAMORE\t종가")
     for j in range(compare_predict_size):
-        print(f"\tD-{compare_predict_size - j  - 1}:\t예측값 {sample_predict_x[i][j]}\t")
+        print(f"\tD-{compare_predict_size - j  - 1}:\t{sample_predict_x[i][j]} 원\t")
 print("="*100)
