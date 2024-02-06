@@ -78,13 +78,6 @@ samsung_csv = samsung_csv.drop('전일비', axis=1).drop('외인비', axis=1).dr
 amore_csv = amore_csv.drop('전일비', axis=1).drop('외인비', axis=1).drop('신용비', axis=1)
 
 # ============================================================================
-# 수치화 - 문자: 전일비
-# from sklearn.preprocessing import LabelEncoder
-# lbe = LabelEncoder()
-# samsung_csv['전일비'] = lbe.fit_transform(samsung_csv['전일비'])
-# amore_csv['전일비'] = lbe.fit_transform(amore_csv['전일비'])
-
-# ============================================================================
 # split
 samsung_x, samsung_y = split_xy(samsung_csv, time_steps, behind_size, ['시가'])
 amore_x, amore_y = split_xy(amore_csv, time_steps, behind_size, ['종가'])
@@ -122,21 +115,13 @@ r_amore_sample_x = amore_scaler.transform(r_amore_sample_x)
 
 # ============================================================================
 # reshape
-#3차원
+# 3차원
 s_x_train = r_s_x_train.reshape(-1, s_x_train.shape[1], s_x_train.shape[2])
 s_x_test = r_s_x_test.reshape(-1, s_x_test.shape[1], s_x_test.shape[2])
 a_x_train = r_a_x_train.reshape(-1, a_x_train.shape[1], a_x_train.shape[2])
 a_x_test = r_a_x_test.reshape(-1, a_x_test.shape[1], a_x_test.shape[2])
 samsung_sample_x = r_samsung_sample_x.reshape(-1, samsung_sample_x.shape[1], samsung_sample_x.shape[2])
 amore_sample_x = r_amore_sample_x.reshape(-1, amore_sample_x.shape[1], amore_sample_x.shape[2])
-
-#4차원
-# s_x_train = r_s_x_train.reshape(-1, s_x_train.shape[1], s_x_train.shape[2], 1)
-# s_x_test = r_s_x_test.reshape(-1, s_x_test.shape[1], s_x_test.shape[2], 1)
-# a_x_train = r_a_x_train.reshape(-1, a_x_train.shape[1], a_x_train.shape[2], 1)
-# a_x_test = r_a_x_test.reshape(-1, a_x_test.shape[1], a_x_test.shape[2], 1)
-# samsung_sample_x = r_samsung_sample_x.reshape(-1, samsung_sample_x.shape[1], samsung_sample_x.shape[2], 1)
-# amore_sample_x = r_amore_sample_x.reshape(-1, amore_sample_x.shape[1], amore_sample_x.shape[2], 1)
 
 # ============================================================================
 # 2. 모델 구성
@@ -145,7 +130,7 @@ from keras.layers import Dense, LSTM, ConvLSTM1D, Input, Flatten, concatenate, M
 from keras.callbacks import EarlyStopping
 
 # ============================================================================
-#모델 삼성
+# 모델 삼성
 s_input = Input(shape=(time_steps, len(samsung_csv.columns)))
 s_layer_1 = LSTM(32)(s_input)
 s_layer_2 = Dense(16,activation='relu')(s_layer_1)
@@ -154,21 +139,8 @@ s_layer_4 = Dense(16,activation='relu')(s_layer_3)
 s_layer_5 = Dense(16,activation='relu')(s_layer_4)
 s_output = Dense(16)(s_layer_5)
 
-# s_input = Input(shape=(time_steps, len(samsung_csv.columns), 1))
-# s_layer_1 =  ConvLSTM1D(filters=32, kernel_size=2)(s_input)
-# s_mp_layer = MaxPooling1D(2)(s_layer_1)
-# s_flatter = Flatten()(s_mp_layer)
-# s_layer_2 = Dense(8,activation='relu')(s_flatter)
-# s_layer_3 = Dense(16,activation='relu')(s_layer_2)
-# s_layer_4 = Dense(8,activation='relu')(s_layer_3)
-# s_layer_5 = Dense(16,activation='relu')(s_layer_4)
-# s_layer_6 = Dense(8,activation='relu')(s_layer_5)
-# s_layer_7 = Dense(16, activation='relu')(s_layer_6)
-# s_layer_8 = Dense(8, activation="relu")(s_layer_7)
-# s_output = Dense(16)(s_layer_8)
-
 # ============================================================================
-#모델 아모레퍼시픽
+# 모델 아모레퍼시픽
 a_input = Input(shape=(time_steps, len(amore_csv.columns)))
 a_layer_1 = LSTM(32)(a_input)
 a_layer_2 = Dense(16, activation='relu')(a_layer_1)
@@ -177,57 +149,19 @@ a_layer_4 = Dense(16, activation='relu')(a_layer_3)
 a_layer_5 = Dense(16, activation='relu')(a_layer_4)
 a_output = Dense(16)(a_layer_5)
 
-
-# a_input = Input(shape=(time_steps, len(amore_csv.columns), 1))
-# a_layer_1 =  ConvLSTM1D(filters=32, kernel_size=3)(s_input)
-# a_mp_layer = MaxPooling1D(2)(a_layer_1)
-# a_flatter = Flatten()(a_mp_layer)
-# a_layer_2 = Dense(16, activation='relu')(a_flatter)
-# a_layer_3 = Dense(8, activation='relu')(a_layer_2)
-# a_layer_4 = Dense(16, activation='relu')(a_layer_3)
-# a_layer_5 = Dense(8, activation='relu')(a_layer_4)
-# a_layer_6 = Dense(16, activation='relu')(a_layer_5)
-# a_layer_7 = Dense(8, activation='relu')(a_layer_6)
-# a_layer_8 = Dense(16, activation='relu')(a_layer_7)
-# a_layer_9 = Dense(8, activation='relu')(a_layer_8)
-# a_layer_10 = Dense(16, activation='relu')(a_layer_9)
-# a_layer_11 = Dense(8, activation='relu')(a_layer_10)
-# a_output = Dense(16)(a_layer_11)
-
 # ============================================================================
-#merge 1
+# merge 1
 m1_layer_1 = concatenate([s_output, a_output])
 m1_layer_2 = Dense(64, activation='relu')(m1_layer_1)
 m1_layer_3 = Dense(32 ,activation='relu')(m1_layer_2)
 m1_last_output = Dense(1)(m1_layer_3)
 m2_last_output = Dense(1)(m1_layer_3)
 
-
-# m1_layer_2 = Dense(128, activation='relu')(m1_layer_1)
-# m1_layer_3 = Dense(16 ,activation='relu')(m1_layer_2)
-# m1_layer_4 = Dense(16 ,activation='relu')(m1_layer_3)
-# m1_layer_5 = Dense(16)(m1_layer_4)
-# m1_layer_6 = Dense(16)(m1_layer_5)
-# m1_layer_7 = Dense(16)(m1_layer_6)
-# m1_layer_8 = Dense(16)(m1_layer_7)
-# m1_layer_9 = Dense(16)(m1_layer_8)
-# m1_last_output = Dense(1)(m1_layer_9)
-# m2_last_output = Dense(1)(m1_layer_9)
-
 # # ============================================================================
-# #merge 2
-# m2_layer_1 = concatenate([s_output, a_output]) 
-# m2_layer_2 = Dense(16)(m2_layer_1)
-# m2_layer_3 = Dense(16)(m2_layer_2)
-# m2_layer_4 = Dense(16)(m2_layer_3)
-# m2_layer_5 = Dense(16)(m2_layer_4)
-# m2_layer_6 = Dense(16)(m2_layer_5)
-# m2_layer_7 = Dense(16)(m2_layer_6)
-# m2_layer_8 = Dense(16)(m2_layer_7)
-# m2_last_output = Dense(1)(m2_layer_5)
+
 
 # ============================================================================
-#model 정의
+# model 정의
 model = Model(inputs = [s_input, a_input], outputs = [m1_last_output, m2_last_output])
 
 # ============================================================================
@@ -284,10 +218,13 @@ while 1 :
 
     # ============================================================================
     # .h5 file 저장
-    print(sample_predict_x[0][compare_predict_size-2])
-    print(sample_predict_x[1][compare_predict_size-3])
-    # 삼성 : 2/6 시가, 아모레 2/5 종가를 맞추는 모델은 저장
-    if 74000 <= sample_predict_x[0][compare_predict_size-2] <=74300 and 117000 <= sample_predict_x[1][compare_predict_size-3] <= 123000 :
+    # 삼성 : 2/5 2/6 시가, 아모레 2/5, 2/6 종가를 맞추는 모델은 저장
+    if (
+        74200 <= sample_predict_x[0][compare_predict_size - 2] <= 74400
+        and 74200 <= sample_predict_x[0][compare_predict_size - 3] <= 74400
+        and 125000 <= sample_predict_x[1][compare_predict_size - 2] <= 125500
+        and 117000 <= sample_predict_x[1][compare_predict_size - 3] <= 123000
+    ):
         h_path = "C:/_data/sihum/save_weight/"
         h5_file_name_d = h5_file_name(h_path , f"save_model_samsung_{sample_predict_x[0][len(sample_predict_x)-1]}_amore_{sample_predict_x[1][len(sample_predict_x)-1]}_")
         model.save(h5_file_name_d)
