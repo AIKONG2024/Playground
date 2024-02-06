@@ -8,7 +8,7 @@ from keras_custom_pk.hyper_model import MulticlassClassificationModel
 from keras_custom_pk.file_name import *
 from keras_custom_pk.callbacks import CustomEarlyStoppingAtLoss
 
-time_steps = 180
+time_steps = 1
 behind_size = 2 
 compare_predict_size = 10
 
@@ -27,20 +27,18 @@ def split_xy(dataFrame, cutting_size, y_behind_size,  y_column):
 
 '''
 전처리 note 
+timesteps : 1
 ===================================
 삼성
- 
-2015/08/30 이후 데이터 사용
-7일
-30일
+train : 2008.10.27
+2019.1.1 ~ 2020.03.04
+test : 2022.9.30 ~ 현재
 
 ===================================
 아모레 
-
-2020/03/23 이후 데이터 사용
-7일
-30일
-
+train : 2017.8.1 ~ 2018.06.26
+train : 2016.2 ~ 2020.11
+test : 2021.10.01~ 현재
 ===================================
 '''
 
@@ -52,8 +50,16 @@ amore_csv = pd.read_csv(path + "아모레 240205.csv", encoding='cp949', thousan
 
 # ===========================================================================
 # 데이터 일자 이후 자르기
-samsung_csv = samsung_csv[samsung_csv.index > "2018/08/30"][:956]
-amore_csv = amore_csv[amore_csv.index > "2020/03/23"]
+samsung_csv = samsung_csv[samsung_csv.index < "2009/01/01"]
+amore_csv = amore_csv[amore_csv.index > "2009/01/01"]
+
+#액면분할처리
+samsung_csv = samsung_csv[samsung_csv.index < "2015/05/08"] / 50
+amore_csv = amore_csv[amore_csv.index < "2018/05/04"]['금액'] /10
+
+
+print(samsung_csv.shape)#(3920, 16)
+print(amore_csv.shape) #(1601, 16)
 
 print(samsung_csv.columns)
 # ['시가', '고가', '저가', '종가', '전일비', 'Unnamed: 6', '등락률', '거래량', '금액(백만)',
@@ -74,8 +80,8 @@ amore_csv.sort_values(['일자'], ascending=True, inplace=True)
 
 # ===========================================================================
 # 컬럼 제거
-samsung_csv = samsung_csv.drop('전일비', axis=1).drop('외인비', axis=1).drop('신용비', axis=1)
-amore_csv = amore_csv.drop('전일비', axis=1).drop('외인비', axis=1).drop('신용비', axis=1)
+samsung_csv = samsung_csv.drop('전일비', axis=1).drop('외인비', axis=1)
+amore_csv = amore_csv.drop('전일비', axis=1).drop('외인비', axis=1)
 
 # ============================================================================
 # split
@@ -126,7 +132,7 @@ amore_sample_x = r_amore_sample_x.reshape(-1, amore_sample_x.shape[1], amore_sam
 # ============================================================================
 # 2. 모델 구성
 from keras.models import Model
-from keras.layers import Dense, LSTM, ConvLSTM1D, Input, Flatten, concatenate, MaxPooling1D
+from keras.layers import Dense, LSTM, ConvLSTM1D, Input, Flatten, concatenate, MaxPooling1D, Dropout
 from keras.callbacks import EarlyStopping
 
 # ============================================================================
@@ -152,8 +158,9 @@ a_output = Dense(16)(a_layer_5)
 # ============================================================================
 # merge 1
 m1_layer_1 = concatenate([s_output, a_output])
-m1_layer_2 = Dense(64, activation='relu')(m1_layer_1)
-m1_layer_3 = Dense(32 ,activation='relu')(m1_layer_2)
+m1_layer_2 = Dense(128, activation='relu')(m1_layer_1)
+m1_drop_1 = Dropout(0.5)
+m1_layer_3 = Dense(64 ,activation='relu')(m1_layer_2)
 m1_last_output = Dense(1)(m1_layer_3)
 m2_last_output = Dense(1)(m1_layer_3)
 
@@ -174,7 +181,7 @@ while 1 :
             epochs=1000,
             batch_size=3000,
             validation_split=0.2,
-            verbose=1,
+            verbose=0,
             callbacks=[
                 CustomEarlyStoppingAtLoss(
                     patience=2000,
@@ -218,11 +225,12 @@ while 1 :
 
     # ============================================================================
     # .h5 file 저장
-    # 삼성 : 2/5 2/6 시가, 아모레 2/5, 2/6 종가를 맞추는 모델은 저장
+    # 삼성 2/5 시가 : 74300 // 2/6 시가 : 74300, 
+    # 아모레 2/5 종가 : 120000 // 2/6 종가 : 126800 
     if (
         74200 <= sample_predict_x[0][compare_predict_size - 2] <= 74400
         and 74200 <= sample_predict_x[0][compare_predict_size - 3] <= 74400
-        and 125000 <= sample_predict_x[1][compare_predict_size - 2] <= 125500
+        and 125000 <= sample_predict_x[1][compare_predict_size - 2] <= 126000
         and 117000 <= sample_predict_x[1][compare_predict_size - 3] <= 123000
     ):
         h_path = "C:/_data/sihum/save_weight/"
