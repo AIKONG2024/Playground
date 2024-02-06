@@ -119,20 +119,24 @@ amore_scaler = StandardScaler()
 r_a_x_train = amore_scaler.fit_transform(r_a_x_train)
 r_a_x_test = amore_scaler.transform(r_a_x_test)
 r_amore_sample_x = amore_scaler.transform(r_amore_sample_x)
-# s_x_train = s_x_train.reshape(-1, s_x_train_shape_1, s_x_train_shape_2)
-# s_x_test = s_x_test.reshape(-1, s_x_test_shape_1, s_x_test_shape_2)
-# a_x_train = a_x_train.reshape(-1, a_x_train_shape_1, a_x_train_shape_2)
-# a_x_test = a_x_test.reshape(-1, a_x_test_shape_1, a_x_test_shape_2)
-s_x_train = r_s_x_train.reshape(-1, s_x_train.shape[1], s_x_train.shape[2], 1)
-s_x_test = r_s_x_test.reshape(-1, s_x_test.shape[1], s_x_test.shape[2], 1)
-a_x_train = r_a_x_train.reshape(-1, a_x_train.shape[1], a_x_train.shape[2], 1)
-a_x_test = r_a_x_test.reshape(-1, a_x_test.shape[1], a_x_test.shape[2], 1)
 
-samsung_sample_x = r_samsung_sample_x.reshape(-1, samsung_sample_x.shape[1], samsung_sample_x.shape[2], 1)
-amore_sample_x = r_amore_sample_x.reshape(-1, amore_sample_x.shape[1], amore_sample_x.shape[2], 1)
+# ============================================================================
+# reshape
+#3차원
+s_x_train = r_s_x_train.reshape(-1, s_x_train.shape[1], s_x_train.shape[2])
+s_x_test = r_s_x_test.reshape(-1, s_x_test.shape[1], s_x_test.shape[2])
+a_x_train = r_a_x_train.reshape(-1, a_x_train.shape[1], a_x_train.shape[2])
+a_x_test = r_a_x_test.reshape(-1, a_x_test.shape[1], a_x_test.shape[2])
+samsung_sample_x = r_samsung_sample_x.reshape(-1, samsung_sample_x.shape[1], samsung_sample_x.shape[2])
+amore_sample_x = r_amore_sample_x.reshape(-1, amore_sample_x.shape[1], amore_sample_x.shape[2])
 
-
-
+#4차원
+# s_x_train = r_s_x_train.reshape(-1, s_x_train.shape[1], s_x_train.shape[2], 1)
+# s_x_test = r_s_x_test.reshape(-1, s_x_test.shape[1], s_x_test.shape[2], 1)
+# a_x_train = r_a_x_train.reshape(-1, a_x_train.shape[1], a_x_train.shape[2], 1)
+# a_x_test = r_a_x_test.reshape(-1, a_x_test.shape[1], a_x_test.shape[2], 1)
+# samsung_sample_x = r_samsung_sample_x.reshape(-1, samsung_sample_x.shape[1], samsung_sample_x.shape[2], 1)
+# amore_sample_x = r_amore_sample_x.reshape(-1, amore_sample_x.shape[1], amore_sample_x.shape[2], 1)
 
 # ============================================================================
 # 2. 모델 구성
@@ -142,11 +146,8 @@ from keras.callbacks import EarlyStopping
 
 # ============================================================================
 #모델 삼성
-s_input = Input(shape=(time_steps, len(samsung_csv.columns), 1))
-# s_layer_1 =  ConvLSTM1D(filters=32, kernel_size=2)(s_input)
-# s_mp_layer = MaxPooling1D(2)(s_layer_1)
-# s_flatter = Flatten()(s_mp_layer)
-s_layer_2 = LSTM(filter=32)(s_input)
+s_input = Input(shape=(time_steps, len(samsung_csv.columns)))
+s_layer_2 = LSTM(32)(s_input)
 s_layer_3 = Dense(16,activation='relu')(s_layer_2)
 s_layer_4 = Dense(16,activation='relu')(s_layer_3)
 s_layer_5 = Dense(16,activation='relu')(s_layer_4)
@@ -167,10 +168,8 @@ s_output = Dense(16)(s_layer_5)
 
 # ============================================================================
 #모델 아모레퍼시픽
-a_input = Input(shape=(time_steps, len(amore_csv.columns), 1))
-# a_layer_1 =  ConvLSTM1D(filters=32, kernel_size=3)(s_input)
-# a_mp_layer = MaxPooling1D(2)(a_layer_1)
-a_layer_1 = LSTM(filter=32)(a_input)
+a_input = Input(shape=(time_steps, len(amore_csv.columns)))
+a_layer_1 = LSTM(32)(a_input)
 a_layer_2 = Dense(16, activation='relu')(a_layer_1)
 a_layer_3 = Dense(16, activation='relu')(a_layer_2)
 a_layer_4 = Dense(16, activation='relu')(a_layer_3)
