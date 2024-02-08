@@ -49,6 +49,8 @@ test_csv['CALC'] = lbe.transform(test_csv['CALC'])
 train_csv['MTRANS'] = lbe.fit_transform(train_csv['MTRANS'])
 test_csv['MTRANS'] = lbe.transform(test_csv['MTRANS'])
 
+train_csv['NObeyesdad'] = lbe.fit_transform(train_csv['NObeyesdad'])
+
 # 뽑아낼값 : [NObeyesdad]
 x = train_csv.drop(['NObeyesdad'], axis=1)
 y = train_csv['NObeyesdad']
@@ -65,12 +67,12 @@ x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
 test_csv = scaler.transform(test_csv)
 
-n_splits = 5
-kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
+# n_splits = 3
+# kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
 
 parameters = [
-    {"learning_rate": [1e-2, 1e-3, 1e-4], "best_model_min_trees": [3, 5, 7, 9, 11], "max_depth": [10, 20]},
-    {"learning_rate": [1e-2, 1e-3, 1e-4], "best_model_min_trees": [3, 5, 7, 9, 11], "max_depth": [10, 20], "max_leaves" : [6, 10 ,15]},
+    {"max_depth": [10]},
+    # {"learning_rate": [1e-2, 1e-3, 1e-4], "best_model_min_trees": [3, 5, 7, 9, 11], "max_depth": [10, 20], "max_leaves" : [6, 10 ,15]},
     # {"learning_rate": [1e-2, 1e-3, 1e-4], "best_model_min_trees": [3, 5, 7, 9, 11], "max_depth": [10, 20]},
 ]
 
@@ -81,12 +83,14 @@ parameters = [
 model = cbst.CatBoostClassifier()
 # model = xgb.XGBClassifier()
 
-gsc = GridSearchCV(model, param_grid= parameters , cv=kf, n_jobs=-1, refit=True, verbose=1 )
-gsc.fit(x_train, y_train) 
-x_pred = gsc.best_estimator_.predict(x_test)
-best_acc_score = accuracy_score(y_test, x_pred) 
-print("best_acc_score : ", best_acc_score)
-submission = gsc.best_estimator_.predict(test_csv)
+# gsc = GridSearchCV(model, param_grid= parameters , cv=kf, n_jobs=-1, refit=True, verbose=1 )
+# gsc.fit(x_train, y_train) 
+# x_pred = gsc.best_estimator_.predict(x_test)
+# best_acc_score = accuracy_score(y_test, x_pred) 
+# print("best_acc_score : ", best_acc_score)
+# submission = gsc.best_estimator_.predict(test_csv)
+model.fit(x_train, y_train)
+submission = lbe.inverse_transform(model.predict(test_csv)) 
 # ====================================================
 # 데이터 저장 
 submission_csv["NObeyesdad"] = submission
