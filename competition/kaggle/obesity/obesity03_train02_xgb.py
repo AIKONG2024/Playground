@@ -26,13 +26,13 @@ def obtuna_tune():
     def objective(trial: optuna.Trial):
         params = {
             'grow_policy': trial.suggest_categorical('grow_policy', ["depthwise", "lossguide"]),
-            'n_estimators': trial.suggest_int('n_estimators', 100, 2000), 
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 1.0),
+            'n_estimators': trial.suggest_int('n_estimators', 10, 1000), 
+            'learning_rate': trial.suggest_float('learning_rate', 0.01, 3.0),
             'gamma' : trial.suggest_float('gamma', 1e-9, 1.0), #필수
             'subsample': trial.suggest_float('subsample', 0.25, 1.0),
             'colsample_bytree': trial.suggest_float('colsample_bytree', 0.25, 1.0),
-            'max_depth': trial.suggest_int('max_depth', 0, 24),#필수
-            'min_child_weight': trial.suggest_int('min_child_weight', 1, 30), #필수 
+            'max_depth': trial.suggest_int('max_depth', 0, 50),#필수
+            'min_child_weight': trial.suggest_int('min_child_weight', 1, 40), #필수 
             'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 10.0, log=True),
             'reg_alpha': trial.suggest_float('reg_alpha', 1e-9, 10.0, log=True),    
             'eval_metric' : 'auc',

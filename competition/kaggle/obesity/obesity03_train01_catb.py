@@ -23,8 +23,8 @@ def obtuna_tune():
         params = {
             'iterations': iterations,  # High number of estimators
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
-            'depth': trial.suggest_int('depth', 3, 10),
-            'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 0.01, 10.0),
+            'depth': trial.suggest_int('depth', 3, 30),
+            'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 0.01, 30.0),
             'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),
             'random_seed': SEED,
             'verbose': False,

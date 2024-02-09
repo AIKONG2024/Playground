@@ -22,14 +22,9 @@ def obtuna_tune():
     # Hyperparameter Optimization
     def objective(trial: optuna.Trial):
         params = {
-            'max_depth' : trial.suggest_int('max_depth', 2, 20),
-            'min_samples_split' : trial.suggest_float('min_samples_split', 1, 4),
-            'min_samples_leaf' : trial.suggest_float('min_samples_leaf', .1, 50),
-            'max_depth' : trial.suggest_int('max_depth', 1, 30),
-            'max_samples' : trial.suggest_float('max_samples', 0, 1.),
+            'max_depth' : trial.suggest_int('max_depth', 1, 50),
             'n_estimators' : iterations,
             'random_state' : SEED,
-            'max_leaf_nodes': trial.suggest_int('max_leaf_nodes', 10, 100),          
         }
         clf = get_fitted_randomForest(params, datasets)
         

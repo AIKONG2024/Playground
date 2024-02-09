@@ -25,11 +25,11 @@ def obtuna_tune():
     def objective(trial: optuna.Trial):
         params = {
             'learning_rate' : trial.suggest_float('learning_rate', .001, .1, log = True),
-            'max_depth' : trial.suggest_int('max_depth', 2, 20),
+            'max_depth' : trial.suggest_int('max_depth', 2, 50),
             'subsample' : trial.suggest_float('subsample', .5, 1),
             'min_child_weight' : trial.suggest_float('min_child_weight', .1, 15, log = True),
-            'reg_lambda' : trial.suggest_float('reg_lambda', .1, 20, log = True),
-            'reg_alpha' : trial.suggest_float('reg_alpha', .1, 10, log = True),
+            'reg_lambda' : trial.suggest_float('reg_lambda',  1e-9, 10.0, log = True),
+            'reg_alpha' : trial.suggest_float('reg_alpha',  1e-9, 10.0, log = True),
             'n_estimators' : iterations,
             'random_state' : SEED,
             'device_type' : "gpu",
