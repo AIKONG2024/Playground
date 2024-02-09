@@ -2,35 +2,48 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from obesity01_data import lable_encoding, get_data
-from obesity02_models import get_catboost, get_fitted_catboost
+from obesity02_models import get_lightgbm, get_fitted_lightgbm
 from obesity04_utils import save
 from obesity00_seed import SEED
+import warnings
 
 # ====================================================================================
 # obtuna Tunner 이용
 def obtuna_tune():
     import optuna
+    
     # get data
     path = "C:/_data/kaggle/obesity/"
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
-
-    cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
+    
+    train_csv, test_csv, encoder = lable_encoding(train_csv, test_csv)
+    
     datasets = get_data(train_csv)
 
     # Hyperparameter Optimization
     def objective(trial: optuna.Trial):
         params = {
-            "learning_rate": trial.suggest_float("learning_rate", 1e-3, 1e-1, log=True),            
+            'learning_rate' : trial.suggest_float('learning_rate', .001, .1, log = True),
+            'max_depth' : trial.suggest_int('max_depth', 2, 20),
+            'subsample' : trial.suggest_float('subsample', .5, 1),
+            'min_child_weight' : trial.suggest_float('min_child_weight', .1, 15, log = True),
+            'reg_lambda' : trial.suggest_float('reg_lambda', .1, 20, log = True),
+            'reg_alpha' : trial.suggest_float('reg_alpha', .1, 10, log = True),
+            'n_estimators' : iterations,
+            'random_state' : SEED,
+            'device_type' : "gpu",
+            'num_leaves': trial.suggest_int('num_leaves', 10, 1000),  
+            'verbose' : -1        
         }
-        clf = get_fitted_catboost(params, datasets, PATIENCE, ITERATIONS, cat_features)
-
+        clf = get_fitted_lightgbm(params, datasets)
+        
         X_test, y_test = datasets[1], datasets[3]
         predictions = clf.predict(X_test)
         return accuracy_score(y_test, predictions)
 
     study = optuna.create_study(study_name="obesity-accuracy", direction="maximize")
-    study.optimize(objective, n_trials=N_TRIALS)
+    study.optimize(objective, n_trials=n_trial)
     best_study = study.best_trial
     print(
     f"""
@@ -43,8 +56,8 @@ def obtuna_tune():
     )
 
     # predict
-    best_model = get_fitted_catboost(best_study.params, datasets, cat_features)  # bestest
-    predictions = best_model.predict(test_csv)[:, 0]
+    best_model = get_fitted_lightgbm(best_study.params, datasets)  # bestest
+    predictions = encoder.inverse_transform(best_model.predict(test_csv))
     save(path, round(best_study.value,4), predictions)
 
 
@@ -55,23 +68,32 @@ def GridSearchCV_tune():
     path = "C:/_data/kaggle/obesity/"
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
-    
+
     train_csv, test_csv, encoder = lable_encoding(train_csv, test_csv)
     X_train, X_test, y_train, y_test = get_data(train_csv)
     from sklearn.model_selection import StratifiedKFold, GridSearchCV
-    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
-    
-    clf = get_catboost(params = {"learning_rate" : [1e-3, 1e-2, 1e-1] }, patience=PATIENCE, iterations=ITERATIONS)
-    
+    kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
+    clf = get_lightgbm(params={})
+
     # Hyperparameter Optimization
-    gsc = GridSearchCV(clf, param_grid=  {"learning_rate" : [1e-3, 1e-2, 1e-1] } , cv=kf, verbose=100, refit=True)
-    gsc.fit(X_train, y_train, early_stopping_rounds = PATIENCE) 
+    gsc = GridSearchCV(clf, param_grid= {
+            'learning_rate' : [.001, .1],
+            'max_depth' : [2, 20] ,
+            'subsample' : [5, 1],
+            'min_child_weight' : [ .1, 15],
+            'reg_lambda' : [.1, 20],
+            'reg_alpha' : [.1, 10],
+            'n_estimators' : [iterations],
+            'random_state' : [SEED],
+            'device_type' : ["gpu"],
+            'num_leaves': [10, 1000],    
+        } , cv=kf, verbose=-1, refit=True)
+    gsc.fit(X_train, y_train,eval_set=[(X_train, y_train),(X_test, y_test)])
     x_predictsion = gsc.best_estimator_.predict(X_test)
-    
+
     best_acc_score = accuracy_score(y_test, x_predictsion) 
     print(
     f"""
-    {__name__}
     ============================================
     [best_acc_score : {best_acc_score}]
     [Best params : {gsc.best_params_}]
@@ -86,18 +108,17 @@ def GridSearchCV_tune():
 
 # ====================================================================================
 
-global PATIENCE, ITERATIONS, N_TRIALS
-PATIENCE = 100
-ITERATIONS = 1000
-N_TRIALS = 10
+patience = 1000
+iterations = 3000
+n_trial = 5
 n_splits = 5
 
 # ====================================================================================
 
 # RUN
 def main():
-    # obtuna_tune()
-    GridSearchCV_tune()
+    obtuna_tune()
+    # GridSearchCV_tune()
 
 if __name__ == '__main__':
     main()

@@ -11,6 +11,7 @@ from obesity00_seed import SEED
 #obtuna Tunner 이용
 def obtuna_tune():
     import optuna
+    
     # get data
     path = "C:/_data/kaggle/obesity/"
     train_csv = pd.read_csv(path + "train.csv")
@@ -36,16 +37,23 @@ def obtuna_tune():
             'reg_alpha': trial.suggest_float('reg_alpha', 1e-9, 10.0, log=True),    
             'eval_metric' : 'auc',
             'booster' : 'gbtree',
-            'verbosity' : 0
+            'verbosity' : 0,
+            'objective' : "multi:sotfmax",
+            'device' : 'cuda',
+            'enable_categorical' : True,
+            'max_cat_to_onehot' : 7,
+            'early_stopping_rounds' : patience,
+            'importance_type' : 'weight',
+            'random_state' : SEED,
         }
-        clf = get_fitted_xgboost(params, datasets, PATIENCE)
+        clf = get_fitted_xgboost(params, datasets)
         
         X_test, y_test = datasets[1], datasets[3]
         predictions = clf.predict(X_test)
         return accuracy_score(y_test, predictions)
 
     study = optuna.create_study(study_name="obesity-accuracy", direction="maximize")
-    study.optimize(objective, n_trials=N_TRIALS)
+    study.optimize(objective, n_trials=n_trial)
     best_study = study.best_trial
     print(
     f"""
@@ -58,7 +66,7 @@ def obtuna_tune():
     )
 
     # predict
-    best_model = get_fitted_xgboost(best_study.params, datasets, PATIENCE)  # bestest
+    best_model = get_fitted_xgboost(best_study.params, datasets)  # bestest
     predictions = encoder.inverse_transform(best_model.predict(test_csv))
     save(path, round(best_study.value,4), predictions)
 
@@ -77,14 +85,7 @@ def GridSearchCV_tune():
     from sklearn.model_selection import StratifiedKFold, GridSearchCV
     kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
     
-    clf = get_xgboost(params= {
-            'gamma' :  [1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1.0], #필수
-            'max_depth': [0, 4,8,12,16,20, 24],#필수
-            'min_child_weight': [1,3,5,7,9,12,15,18,21,24,27, 30], #필수 
-            'eval_metric' : ['auc'],
-            'booster' : ['gbtree'],
-            'verbosity' : [0]
-        }, patience=PATIENCE)
+    clf = get_xgboost(params= {})
     
     # Hyperparameter Optimization
     gsc = GridSearchCV(clf, param_grid={
@@ -93,7 +94,14 @@ def GridSearchCV_tune():
             'min_child_weight': [1,3,5,7,9,12,15,18,21,24,27, 30], #필수 
             'eval_metric' : ['auc'],
             'booster' : ['gbtree'],
-            'verbosity' : [0]
+            'verbosity' : [0],
+            'objective' : ["multi:sotfmax"],
+            'device' : ['cuda'],
+            'enable_categorical' : [True],
+            'max_cat_to_onehot' : [7],
+            'early_stopping_rounds' :[ patience],
+            'importance_type' : ['weight'],
+            'random_state' : [SEED],
         } , cv=kf, verbose=100, refit=True)
     gsc.fit(X_train, y_train, eval_set=[(X_test, y_test)] ,verbose=False)
     x_predictsion = gsc.best_estimator_.predict(X_test)
@@ -101,7 +109,6 @@ def GridSearchCV_tune():
     best_acc_score = accuracy_score(y_test, x_predictsion) 
     print(
     f"""
-    {__name__}
     ============================================
     [best_acc_score : {best_acc_score}]
     [Best params : {gsc.best_params_}]
@@ -116,9 +123,9 @@ def GridSearchCV_tune():
 
 #====================================================================================
 
-global PATIENCE, N_TRIALS
-PATIENCE = 300
-N_TRIALS = 5
+patience = 1000
+iterations = 3000
+n_trial = 5
 n_splits = 5
 
 #====================================================================================

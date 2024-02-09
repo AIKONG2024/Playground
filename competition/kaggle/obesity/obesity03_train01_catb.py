@@ -2,8 +2,9 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from obesity01_data import lable_encoding, get_data
-from obesity02_models import get_lightgbm, get_fitted_lightgbm
+from obesity02_models import get_catboost, get_fitted_catboost
 from obesity04_utils import save
+from obesity00_seed import SEED
 
 # ====================================================================================
 # obtuna Tunner 이용
@@ -13,23 +14,30 @@ def obtuna_tune():
     path = "C:/_data/kaggle/obesity/"
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
-    
+
     cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
     datasets = get_data(train_csv)
 
     # Hyperparameter Optimization
     def objective(trial: optuna.Trial):
         params = {
-            "learning_rate": trial.suggest_float("learning_rate", 1e-3, 1e-1, log=True),           
+            'iterations': iterations,  # High number of estimators
+            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
+            'depth': trial.suggest_int('depth', 3, 10),
+            'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 0.01, 10.0),
+            'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),
+            'random_seed': SEED,
+            'verbose': False,
+            'task_type':"GPU"          
         }
-        clf = get_fitted_lightgbm(params, datasets, PATIENCE, ITERATIONS, cat_features)
-        
+        clf = get_fitted_catboost(params, datasets, cat_features)
+
         X_test, y_test = datasets[1], datasets[3]
         predictions = clf.predict(X_test)
         return accuracy_score(y_test, predictions)
 
     study = optuna.create_study(study_name="obesity-accuracy", direction="maximize")
-    study.optimize(objective, n_trials=N_TRIALS)
+    study.optimize(objective, n_trials=n_trial)
     best_study = study.best_trial
     print(
     f"""
@@ -42,7 +50,7 @@ def obtuna_tune():
     )
 
     # predict
-    best_model = get_fitted_lightgbm(best_study.params, datasets, cat_features)  # bestest
+    best_model = get_fitted_catboost(best_study.params, datasets, cat_features)  # bestest
     predictions = best_model.predict(test_csv)[:, 0]
     save(path, round(best_study.value,4), predictions)
 
@@ -54,23 +62,32 @@ def GridSearchCV_tune():
     path = "C:/_data/kaggle/obesity/"
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
-
-    train_csv, test_csv, encoder = encoding(train_csv, test_csv)
+    
+    train_csv, test_csv, encoder = lable_encoding(train_csv, test_csv)
     X_train, X_test, y_train, y_test = get_data(train_csv)
     from sklearn.model_selection import StratifiedKFold, GridSearchCV
-    kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
-
-    clf = get_lightgbm(params={}, patience=PATIENCE, iterations=ITERATIONS)
-
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
+    
+    clf = get_catboost(params ={})
+    
     # Hyperparameter Optimization
-    gsc = GridSearchCV(clf, param_grid= {} , cv=kf, verbose=100, refit=True)
-    gsc.fit(X_train, y_train, early_stopping_rounds = PATIENCE) 
+    gsc = GridSearchCV(clf, param_grid=  {
+            'iterations': [iterations],  
+            'learning_rate': [0.01, 0.3],
+            'depth':  [3, 10],
+            'l2_leaf_reg':  [0.01, 10.0],
+            'bagging_temperature':  [0.0, 1.0],
+            'random_seed': [SEED],
+            'verbose': [True],
+            'task_type':["GPU"]
+            })
+    
+    gsc.fit(X_train, y_train, early_stopping_rounds = patience) 
     x_predictsion = gsc.best_estimator_.predict(X_test)
-
+    
     best_acc_score = accuracy_score(y_test, x_predictsion) 
     print(
     f"""
-    {__name__}
     ============================================
     [best_acc_score : {best_acc_score}]
     [Best params : {gsc.best_params_}]
@@ -84,12 +101,10 @@ def GridSearchCV_tune():
     save(path, round(gsc.best_score_,4), predictions)
 
 # ====================================================================================
-
-global SEED, PATIENCE, ITERATIONS
-SEED = 42
-PATIENCE = 30
-ITERATIONS = 1000
-N_TRIALS = 1
+patience = 1000
+iterations = 3000
+n_trial = 5
+n_splits = 5
 
 # ====================================================================================
 
