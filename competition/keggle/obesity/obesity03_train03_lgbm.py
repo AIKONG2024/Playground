@@ -20,7 +20,7 @@ def obtuna_tune():
     # Hyperparameter Optimization
     def objective(trial: optuna.Trial):
         params = {
-            "learning_rate": trial.suggest_float("learning_rate", 1e-3, 1e-1, log=True),            
+            "learning_rate": trial.suggest_float("learning_rate", 1e-3, 1e-1, log=True),           
         }
         clf = get_fitted_lightgbm(params, datasets, PATIENCE, ITERATIONS, cat_features)
         
@@ -44,7 +44,7 @@ def obtuna_tune():
     # predict
     best_model = get_fitted_lightgbm(best_study.params, datasets, cat_features)  # bestest
     predictions = best_model.predict(test_csv)[:, 0]
-    save(path, predictions)
+    save(path, round(best_study.value,4), predictions)
 
 
 # ====================================================================================
@@ -81,7 +81,7 @@ def GridSearchCV_tune():
 
     # predict
     predictions = encoder.inverse_transform(gsc.best_estimator_.predict(test_csv)) 
-    save(path, predictions)
+    save(path, round(gsc.best_score_,4), predictions)
 
 # ====================================================================================
 

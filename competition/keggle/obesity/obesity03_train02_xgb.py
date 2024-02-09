@@ -60,7 +60,7 @@ def obtuna_tune():
     # predict
     best_model = get_fitted_xgboost(best_study.params, datasets, PATIENCE)  # bestest
     predictions = encoder.inverse_transform(best_model.predict(test_csv))
-    save(path, predictions)
+    save(path, round(best_study.value,4), predictions)
 
     
 #====================================================================================
@@ -112,21 +112,21 @@ def GridSearchCV_tune():
 
     # predict
     predictions = encoder.inverse_transform(gsc.best_estimator_.predict(test_csv)) 
-    save(path, predictions)
+    save(path, round(gsc.best_score_,4), predictions)
 
 #====================================================================================
 
 global PATIENCE, N_TRIALS
-PATIENCE = 1
-N_TRIALS = 1
-n_splits = 4
+PATIENCE = 300
+N_TRIALS = 5
+n_splits = 5
 
 #====================================================================================
 
 # RUN
 def main():
-    # obtuna_tune()
-    GridSearchCV_tune()
+    obtuna_tune()
+    # GridSearchCV_tune()
 
 if __name__ == '__main__':
     main()
