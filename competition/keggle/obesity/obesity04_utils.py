@@ -6,7 +6,7 @@ def save(path, predictions):
     # ====================================================
     # 데이터 저장
     submission_csv = pd.read_csv(path + "sample_submission.csv")
-    submission_csv["NObeyesdad"] = predictions[:, 0]
+    submission_csv["NObeyesdad"] = predictions
     file_name = csv_file_name(path, f"obesity_submit_")
     submission_csv.to_csv(file_name, index=False)
     print(

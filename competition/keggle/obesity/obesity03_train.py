@@ -43,7 +43,7 @@ def obtuna_tune():
 
     # predict
     best_model = get_fitted_catboost(best_study.params, datasets, cat_features)  # bestest
-    predictions = best_model.predict(test_csv)
+    predictions = best_model.predict(test_csv)[:, 0]
     save(path, predictions)
 
     
@@ -83,21 +83,20 @@ def GridSearchCV_tune():
     predictions = encoder.inverse_transform(gsc.best_estimator_.predict(test_csv)) 
     save(path, predictions)
 
-    
 #====================================================================================
 
 global SEED, PATIENCE, ITERATIONS
 SEED = 42
-PATIENCE = 100
+PATIENCE = 30
 ITERATIONS = 1000
-N_TRIALS = 10
+N_TRIALS = 1
 
 #====================================================================================
 
 # RUN
 def main():
-    # obtuna_tune()
-    GridSearchCV_tune()
+    obtuna_tune()
+    # GridSearchCV_tune()
 
 if __name__ == '__main__':
     main()
