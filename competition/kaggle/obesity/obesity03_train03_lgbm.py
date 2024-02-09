@@ -25,7 +25,7 @@ def obtuna_tune():
     def objective(trial: optuna.Trial):
         params = {
             'learning_rate' : trial.suggest_float('learning_rate', .001, .1, log = True),
-            'max_depth' : trial.suggest_int('max_depth', 2, 50),
+            'max_depth' : trial.suggest_int('max_depth', 2, 15),
             'subsample' : trial.suggest_float('subsample', .5, 1),
             'min_child_weight' : trial.suggest_float('min_child_weight', .1, 15, log = True),
             'reg_lambda' : trial.suggest_float('reg_lambda',  1e-9, 10.0, log = True),
@@ -79,7 +79,7 @@ def GridSearchCV_tune():
     # Hyperparameter Optimization
     gsc = GridSearchCV(clf, param_grid= {
             'learning_rate' : [.001, .1],
-            'max_depth' : [2, 20] ,
+            'max_depth' : [2, 15] ,
             'subsample' : [5, 1],
             'min_child_weight' : [ .1, 15],
             'reg_lambda' : [.1, 20],
@@ -110,8 +110,8 @@ def GridSearchCV_tune():
 
 # ====================================================================================
 
-patience = 1000
-iterations = 3000
+patience = 2000
+iterations = 300
 n_trial = 100
 n_splits = 5
 

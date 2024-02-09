@@ -125,8 +125,8 @@ def GridSearchCV_tune():
 
 #====================================================================================
 
-patience = 1000
-iterations = 3000
+patience = 2000
+iterations = 300
 n_trial = 100
 n_splits = 5
 

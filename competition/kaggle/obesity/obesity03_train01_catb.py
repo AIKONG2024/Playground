@@ -23,7 +23,7 @@ def obtuna_tune():
         params = {
             'iterations': iterations,  # High number of estimators
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
-            'depth': trial.suggest_int('depth', 3, 30),
+            'depth': trial.suggest_int('depth', 3, 15),
             'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 0.01, 30.0),
             'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),
             'random_seed': SEED,
@@ -103,8 +103,8 @@ def GridSearchCV_tune():
     save_submit(path, round(gsc.best_score_,4), predictions)
 
 # ====================================================================================
-patience = 1000
-iterations = 3000
+patience = 2000
+iterations = 300
 n_trial = 100
 n_splits = 5
 
