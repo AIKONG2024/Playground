@@ -4,7 +4,6 @@ from sklearn.metrics import accuracy_score
 from obesity01_data import lable_encoding, get_data
 from obesity02_models import get_catboost, get_fitted_catboost
 from obesity04_utils import save
-from sklearn.pipeline import make_pipeline
 from obesity00_seed import SEED
 
 # ====================================================================================
@@ -60,12 +59,12 @@ def GridSearchCV_tune():
     train_csv, test_csv, encoder = lable_encoding(train_csv, test_csv)
     X_train, X_test, y_train, y_test = get_data(train_csv)
     from sklearn.model_selection import StratifiedKFold, GridSearchCV
-    kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
     
-    clf = get_catboost(params={}, patience=PATIENCE, iterations=ITERATIONS)
+    clf = get_catboost(params = {"learning_rate" : [1e-3, 1e-2, 1e-1] }, patience=PATIENCE, iterations=ITERATIONS)
     
     # Hyperparameter Optimization
-    gsc = GridSearchCV(clf, param_grid= {} , cv=kf, verbose=100, refit=True)
+    gsc = GridSearchCV(clf, param_grid=  {"learning_rate" : [1e-3, 1e-2, 1e-1] } , cv=kf, verbose=100, refit=True)
     gsc.fit(X_train, y_train, early_stopping_rounds = PATIENCE) 
     x_predictsion = gsc.best_estimator_.predict(X_test)
     
@@ -91,13 +90,14 @@ global PATIENCE, ITERATIONS, N_TRIALS
 PATIENCE = 30
 ITERATIONS = 1000
 N_TRIALS = 1
+n_splits = 4
 
 # ====================================================================================
 
 # RUN
 def main():
-    obtuna_tune()
-    # GridSearchCV_tune()
+    # obtuna_tune()
+    GridSearchCV_tune()
 
 if __name__ == '__main__':
     main()

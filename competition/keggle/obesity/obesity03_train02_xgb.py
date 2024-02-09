@@ -1,9 +1,11 @@
 # https://www.kaggle.com/competitions/playground-series-s4e2
 import pandas as pd
+import numpy as np
 from sklearn.metrics import accuracy_score
 from obesity01_data import lable_encoding, get_data
 from obesity02_models import get_xgboost, get_fitted_xgboost
 from obesity04_utils import save
+from obesity00_seed import SEED
 
 #====================================================================================
 #obtuna Tunner 이용
@@ -32,10 +34,10 @@ def obtuna_tune():
             'min_child_weight': trial.suggest_int('min_child_weight', 1, 30), #필수 
             'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 10.0, log=True),
             'reg_alpha': trial.suggest_float('reg_alpha', 1e-9, 10.0, log=True),    
-            'eval_metric' : 'auc'
+            'eval_metric' : 'auc',
+            'booster' : 'gbtree',
+            'verbosity' : 0
         }
-        params['booster'] = 'gbtree'
-        params["verbosity"] = 0
         clf = get_fitted_xgboost(params, datasets, PATIENCE)
         
         X_test, y_test = datasets[1], datasets[3]
@@ -71,14 +73,29 @@ def GridSearchCV_tune():
     
     train_csv, test_csv, encoder = lable_encoding(train_csv, test_csv)
     X_train, X_test, y_train, y_test = get_data(train_csv)
-    from sklearn.model_selection import StratifiedKFold, GridSearchCV
-    kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
     
-    clf = get_xgboost(params={}, patience=PATIENCE, iterations=ITERATIONS)
+    from sklearn.model_selection import StratifiedKFold, GridSearchCV
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
+    
+    clf = get_xgboost(params= {
+            'gamma' :  [1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1.0], #필수
+            'max_depth': [0, 4,8,12,16,20, 24],#필수
+            'min_child_weight': [1,3,5,7,9,12,15,18,21,24,27, 30], #필수 
+            'eval_metric' : ['auc'],
+            'booster' : ['gbtree'],
+            'verbosity' : [0]
+        }, patience=PATIENCE)
     
     # Hyperparameter Optimization
-    gsc = GridSearchCV(clf, param_grid= {} , cv=kf, verbose=100, refit=True)
-    gsc.fit(X_train, y_train, early_stopping_rounds = PATIENCE) 
+    gsc = GridSearchCV(clf, param_grid={
+            'gamma' :  [1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1.0], #필수
+            'max_depth': [0, 4,8,12,16,20, 24],#필수
+            'min_child_weight': [1,3,5,7,9,12,15,18,21,24,27, 30], #필수 
+            'eval_metric' : ['auc'],
+            'booster' : ['gbtree'],
+            'verbosity' : [0]
+        } , cv=kf, verbose=100, refit=True)
+    gsc.fit(X_train, y_train, eval_set=[(X_test, y_test)] ,verbose=False)
     x_predictsion = gsc.best_estimator_.predict(X_test)
     
     best_acc_score = accuracy_score(y_test, x_predictsion) 
@@ -99,18 +116,17 @@ def GridSearchCV_tune():
 
 #====================================================================================
 
-global SEED, PATIENCE, ITERATIONS
-SEED = 42
-PATIENCE = 50
-ITERATIONS = 1000
-N_TRIALS = 10
+global PATIENCE, N_TRIALS
+PATIENCE = 1
+N_TRIALS = 1
+n_splits = 4
 
 #====================================================================================
 
 # RUN
 def main():
-    obtuna_tune()
-    # GridSearchCV_tune()
+    # obtuna_tune()
+    GridSearchCV_tune()
 
 if __name__ == '__main__':
     main()

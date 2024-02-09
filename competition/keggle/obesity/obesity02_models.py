@@ -19,7 +19,6 @@ def get_catboost(params , patience, iterations):
 def get_xgboost(params , patience):
     clf = XGBClassifier(
         **params,
-        tree_method="gpu_hist",
         objective = "multi:sotfmax",
         device = 'cuda',
         enable_categorical=True,
