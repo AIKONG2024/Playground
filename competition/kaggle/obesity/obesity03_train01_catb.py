@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 from obesity01_data import lable_encoding, get_data
 from obesity02_models import get_catboost, get_fitted_catboost
-from obesity04_utils import save
+from obesity04_utils import save_submit, save_model
 from obesity00_seed import SEED
 
 # ====================================================================================
@@ -50,9 +50,11 @@ def obtuna_tune():
     )
 
     # predict
-    best_model = get_fitted_catboost(best_study.params, datasets, cat_features)  # bestest
-    predictions = best_model.predict(test_csv)[:, 0]
-    save(path, round(best_study.value,4), predictions)
+    if best_study.value > 0.91:
+        best_model = get_fitted_catboost(best_study.params, datasets, cat_features)  # bestest
+        predictions = best_model.predict(test_csv)[:, 0]
+        save_submit(path, round(best_study.value,4) + "catboost", predictions)
+        save_model(path, round(best_study.value,4) + "catboost", best_model)
 
 
 # ====================================================================================
@@ -98,12 +100,12 @@ def GridSearchCV_tune():
 
     # predict
     predictions = encoder.inverse_transform(gsc.best_estimator_.predict(test_csv)) 
-    save(path, round(gsc.best_score_,4), predictions)
+    save_submit(path, round(gsc.best_score_,4), predictions)
 
 # ====================================================================================
 patience = 1000
 iterations = 3000
-n_trial = 5
+n_trial = 100
 n_splits = 5
 
 # ====================================================================================

@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 from obesity01_data import lable_encoding, get_data
 from obesity02_models import get_randomForest, get_fitted_randomForest
-from obesity04_utils import save
+from obesity04_utils import save_model,save_submit
 from obesity00_seed import SEED
 
 # ====================================================================================
@@ -53,7 +53,9 @@ def obtuna_tune():
     # predict
     best_model = get_fitted_randomForest(best_study.params, datasets)  # bestest
     predictions = encoder.inverse_transform(best_model.predict(test_csv))
-    save(path, round(best_study.value,4), predictions)
+    if best_study.value > 0.91:
+        save_submit(path, round(best_study.value,4) + "randforest", predictions)
+        save_model(path, round(best_study.value,4) + "randforest", best_model)
 
 
 # ====================================================================================
@@ -98,14 +100,15 @@ def GridSearchCV_tune():
     )
 
     # predict
+    
     predictions = encoder.inverse_transform(gsc.best_estimator_.predict(test_csv)) 
-    save(path, round(gsc.best_score_,4), predictions)
+    save_submit(path, round(gsc.best_score_,4), predictions)
 
 # ====================================================================================
 
 patience = 1000
 iterations = 3000
-n_trial = 5
+n_trial = 100
 n_splits = 5
 
 # ====================================================================================
