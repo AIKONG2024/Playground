@@ -59,8 +59,8 @@ def obtuna_tune():
     best_model = get_fitted_lightgbm(best_study.params, datasets)  # bestest
     predictions = encoder.inverse_transform(best_model.predict(test_csv))
     if best_study.value > 0.91:
-        save_submit(path, round(best_study.value,4) + "light_gbm", predictions)
-        save_model(path, round(best_study.value,4) + "light_gbm", best_model)
+        save_submit(path, f"{round(best_study.value,4)}_light_gbm", predictions)
+        save_model(path, f"{round(best_study.value,4)}_light_gbm", best_model)
 
 # ====================================================================================
 # GridSearchCV Tunner 이용

@@ -53,8 +53,8 @@ def obtuna_tune():
     if best_study.value > 0.91:
         best_model = get_fitted_catboost(best_study.params, datasets, cat_features)  # bestest
         predictions = best_model.predict(test_csv)[:, 0]
-        save_submit(path, round(best_study.value,4) + "catboost", predictions)
-        save_model(path, round(best_study.value,4) + "catboost", best_model)
+        save_submit(path, f"{round(best_study.value,4)}_catboost", predictions)
+        save_model(path, f"{round(best_study.value,4)}_catboost", best_model)
 
 
 # ====================================================================================
