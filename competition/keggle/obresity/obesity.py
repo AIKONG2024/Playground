@@ -12,7 +12,7 @@ import sys
 import time
 sys.path.append('C:/MyPackages/')
 from keras_custom_pk.file_name import *
-
+SEED = 42
 
 path = "C:/_data/kaggle/obesity/"
 # ====================================================
@@ -50,50 +50,60 @@ train_csv['MTRANS'] = lbe.fit_transform(train_csv['MTRANS'])
 test_csv['MTRANS'] = lbe.transform(test_csv['MTRANS'])
 
 train_csv['NObeyesdad'] = lbe.fit_transform(train_csv['NObeyesdad'])
+print(lbe.classes_)
 
 # 뽑아낼값 : [NObeyesdad]
 x = train_csv.drop(['NObeyesdad'], axis=1)
 y = train_csv['NObeyesdad']
+print(y.shape)
 
 print(x.shape, y.shape) #(20758, 16) (20758,)
 
-#데이터
-kf = StratifiedKFold(n_splits=5, shuffle=True, random_state= 100)
+is_holdout = False
+n_splits = 3
+iterations = 500
+patience = 100
 
-x_train, x_test, y_train, y_test = train_test_split(x,y,shuffle=True, random_state=123, train_size=0.8, stratify=y)
-from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
+# 데이터
+kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state= SEED)
+
+x_train, x_test, y_train, y_test = train_test_split(x,y,shuffle=True, random_state=SEED, train_size=0.8, stratify=y)
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
 x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
 test_csv = scaler.transform(test_csv)
 
-# n_splits = 3
-# kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
-
 parameters = [
-    {"max_depth": [10]},
+    {"learning_rate": [1e-2, 1e-3, 1e-4], "max_depth": [10, 20]},
     # {"learning_rate": [1e-2, 1e-3, 1e-4], "best_model_min_trees": [3, 5, 7, 9, 11], "max_depth": [10, 20], "max_leaves" : [6, 10 ,15]},
     # {"learning_rate": [1e-2, 1e-3, 1e-4], "best_model_min_trees": [3, 5, 7, 9, 11], "max_depth": [10, 20]},
 ]
 
 # ====================================================
-#모델 구성
+
+# 모델 구성
 # model = RandomForestClassifier()
 # model = lgbm.LGBMClassifier()
-model = cbst.CatBoostClassifier()
+model = cbst.CatBoostClassifier(
+    # iterations=iterations,
+    random_seed=SEED,
+    task_type="GPU",
+    # one_hot_max_size=7
+)
 # model = xgb.XGBClassifier()
 
-# gsc = GridSearchCV(model, param_grid= parameters , cv=kf, n_jobs=-1, refit=True, verbose=1 )
-# gsc.fit(x_train, y_train) 
-# x_pred = gsc.best_estimator_.predict(x_test)
-# best_acc_score = accuracy_score(y_test, x_pred) 
-# print("best_acc_score : ", best_acc_score)
-# submission = gsc.best_estimator_.predict(test_csv)
-model.fit(x_train, y_train)
-submission = lbe.inverse_transform(model.predict(test_csv)) 
+gsc = GridSearchCV(model, param_grid= parameters , cv=kf, verbose=100)
+gsc.fit(x_train, y_train.values.ravel(), early_stopping_rounds = patience) 
+x_pred = gsc.best_estimator_.predict(x_test)
+best_acc_score = accuracy_score(y_test, x_pred) 
+print("best_acc_score : ", best_acc_score)
+submission = gsc.best_estimator_.predict(test_csv)
+# model.fit(x_train, y_train)
+# submission = lbe.inverse_transform(gsc.best_estimator_.predict(test_csv))
 # ====================================================
-# 데이터 저장 
-submission_csv["NObeyesdad"] = submission
+# 데이터 저장
+submission_csv["NObeyesdad"] = lbe.inverse_transform(submission)
 file_name = csv_file_name(path, f"obesity_submit_")
 submission_csv.to_csv(file_name, index=False)
 # h5_file_name_d = h5_file_name(path, f"obesity_submit_")
