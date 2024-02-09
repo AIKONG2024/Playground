@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import train_test_split
 
 
-def encoding(train_data, test_data):
+def lable_encoding(train_data, test_data):
     encoder = LabelEncoder()
     train_data["Gender"] = encoder.fit_transform(train_data["Gender"])
     test_data["Gender"] = encoder.transform(test_data["Gender"])
@@ -37,7 +37,17 @@ def encoding(train_data, test_data):
 
 
 def get_data(train_data):
-    from obesity03_train import SEED
+    from obesity00_seed import SEED
+
+    X, y = train_data.drop(["NObeyesdad"], axis=1), train_data.NObeyesdad
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.3, random_state=SEED, stratify=y
+    )
+
+    return (X_train, X_test, y_train, y_test)
+
+def get_data(train_data):
+    from obesity00_seed import SEED
 
     X, y = train_data.drop(["NObeyesdad"], axis=1), train_data.NObeyesdad
     X_train, X_test, y_train, y_test = train_test_split(
