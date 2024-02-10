@@ -24,8 +24,8 @@ def onehot_encoding(encoder, data) :
 def scaling(scaler, data):
     if scaler is None :
         # scaler = MinMaxScaler()
-        scaler = StandardScaler()
-        # scaler = MaxAbsScaler()
+        # scaler = StandardScaler()
+        scaler = MaxAbsScaler()
         # scaler = RobustScaler()
         data = scaler.fit_transform(data)
     else:

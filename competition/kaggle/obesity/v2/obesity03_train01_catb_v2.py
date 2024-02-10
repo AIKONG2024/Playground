@@ -19,17 +19,8 @@ def obtuna_tune():
 
     #encoding
     categirical_columns = ["Gender", "family_history_with_overweight", "FAVC", "CAEC", "SMOKE", "SCC", "CALC", "MTRANS"]
-    # for column in categirical_columns:
-    #     train_csv[column] , ohe = onehot_encoding(None, train_csv[column])
-    #     test_csv[column], _ = onehot_encoding(ohe, test_csv[column]) 
     train_csv["NObeyesdad"], lbe = lable_encoding(None, train_csv["NObeyesdad"])
-    
-    # categirical_columns = ["Gender", "family_history_with_overweight", "FAVC", "CAEC", "SMOKE", "SCC", "CALC", "MTRANS"]
-    # for column in categirical_columns :
-    #     train_csv[column] = train_csv[column].astype('category')
-    #     test_csv[column] = test_csv[column].astype('category')
-    
-    #slpit
+
     X_train, X_test, y_train, y_test = get_data(train_csv)
     
     #scaling
@@ -85,7 +76,7 @@ def obtuna_tune():
     # predict
     if best_study.value > 0.911:
         best_model = get_fitted_catboost(best_study.params, X_train, X_test, y_train, y_test, categirical_columns)  # bestest
-        predictions = best_model.predict(test_csv)[:, 0]
+        predictions = lbe.inverse_transform(best_model.predict(test_csv)[:, 0])
         save_submit(path, f"{round(best_study.value,4)}_catboost", predictions)
         save_model(path, f"{round(best_study.value,4)}_catboost", best_model)
 
@@ -136,7 +127,7 @@ def GridSearchCV_tune():
     save_submit(path, round(gsc.best_score_,4), predictions)
 
 # ====================================================================================
-patience = 30
+patience = 10
 iterations = 300
 n_trial = 50
 n_splits = 6

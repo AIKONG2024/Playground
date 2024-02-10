@@ -19,10 +19,6 @@ def obtuna_tune():
     test_csv = pd.read_csv(path + "test.csv")
     
     #encoding
-    # categirical_columns = ["Gender", "family_history_with_overweight", "FAVC", "CAEC", "SMOKE", "SCC", "CALC", "MTRANS"]
-    # for column in categirical_columns:
-    #     train_csv[column] , ohe = onehot_encoding(None, train_csv[column])
-    #     test_csv[column], _ = onehot_encoding(ohe, test_csv[column]) 
     train_csv["NObeyesdad"], lbe = lable_encoding(None, train_csv["NObeyesdad"])
     
     #to category - LGBM에서의 범주형 처리
@@ -143,7 +139,7 @@ def GridSearchCV_tune():
         save_submit(path, round(gsc.best_score_,4), predictions)
 # ====================================================================================
 
-patience = 30
+patience = 10
 iterations = 300
 n_trial = 50
 n_splits = 6
