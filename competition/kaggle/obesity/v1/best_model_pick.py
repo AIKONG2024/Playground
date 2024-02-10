@@ -2,6 +2,7 @@ import obesity03_train01_catb
 import obesity03_train02_xgb
 import obesity03_train03_lgbm
 import obesity03_train04_rf
+
 from random import randint
 
 model_file_list= [obesity03_train01_catb ,obesity03_train02_xgb,

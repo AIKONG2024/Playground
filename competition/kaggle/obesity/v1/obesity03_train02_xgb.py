@@ -2,8 +2,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-from obesity01_data import lable_encoding, get_data
-from obesity02_models import get_xgboost, get_fitted_xgboost
+from competition.kaggle.obesity.v1.obesity01_data import lable_encoding, get_data
+from competition.kaggle.obesity.v1.obesity02_models import get_xgboost, get_fitted_xgboost
 from obesity04_utils import save_submit, save_model
 from obesity00_seed import SEED
 
