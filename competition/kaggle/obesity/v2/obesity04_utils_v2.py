@@ -22,3 +22,17 @@ def save_submit(path, name, predictions):
 def save_model(path, name, model):
     file_name_t = file_name(path, f"obesity_{name}_save_model", "model")
     pickle.dump(model, open(file_name_t, 'wb'))
+    
+
+def save_csv(path, name, csv):
+    # ====================================================
+    # 데이터 저장
+    file_name = csv_file_name(path, f"obesity_submit_{name}_")
+    csv.to_csv(file_name, index=False)
+    print(
+    f"""
+    =============================================
+    {file_name} 파일 저장 완료
+    =============================================
+    """
+    )

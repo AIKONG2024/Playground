@@ -2,9 +2,9 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-from obesity01_data_v2 import lable_encoding, get_data, scaling
+from obesity01_data_v2 import lable_encoding, get_data, scaling, preprocessing, y_encoding
 from obesity02_models_v2 import get_catboost, get_fitted_catboost
-from obesity04_utils_v2 import save_model, save_submit
+from obesity04_utils_v2 import save_model, save_csv
 from obesity00_seed_v2 import SEED
 from sklearn.model_selection import StratifiedKFold
 
@@ -17,18 +17,29 @@ def obtuna_tune():
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
 
+    #preprocessing
+    train_csv = preprocessing(train_csv)
+    test_csv = preprocessing(test_csv)
+    
     #encoding
-    categirical_columns = ["Gender", "family_history_with_overweight", "FAVC", "CAEC", "SMOKE", "SCC", "CALC", "MTRANS"]
-    train_csv["NObeyesdad"], lbe = lable_encoding(None, train_csv["NObeyesdad"])
-
+    train_csv["NObeyesdad"], inverse_dict = y_encoding(train_csv["NObeyesdad"])
+    
+    #to category -범주형 처리
+    categirical_columns = ["Gender", "family_history_with_overweight", "FAVC", "CALC", "MTRANS", "CAEC", "SCC" ,"SMOKE"]
+    for column in categirical_columns :
+        train_csv[column] = train_csv[column].astype('category')
+        test_csv[column] = test_csv[column].astype('category')
+    
+    #slpit
     X_train, X_test, y_train, y_test = get_data(train_csv)
     
     #scaling
-    numeric_colums = ["Age","Height","Weight","FCVC","NCP","CH2O","FAF","TUE"] 
+    numeric_colums = ["Age","Height","Weight","FCVC","NCP","CH2O","FAF","TUE", 'Meal_Habits','BMI'] 
+
     for column in numeric_colums:
         X_train[column], scaler = scaling(None, X_train[column].values.reshape(-1,1))
         X_test[column],_ = scaling(scaler, X_test[column].values.reshape(-1,1))
-        test_csv[column],_ = scaling(scaler, test_csv[column].values.reshape(-1,1))
+        test_csv[column],_ = scaling(scaler, test_csv[column].values.reshape(-1,1))  
 
     # Hyperparameter Optimization
     def objective(trial: optuna.Trial):
@@ -43,22 +54,22 @@ def obtuna_tune():
             'task_type':"GPU"          
         }
         #kfold 적용
-        acc_scores = np.empty(n_splits)
-        folds = StratifiedKFold(n_splits=n_splits, random_state=SEED, shuffle=True)
-        for idx, (train_idx, valid_idx) in enumerate(folds.split(X_train, y_train)):
-            X_train_, y_train_ = X_train.iloc[train_idx], y_train.iloc[train_idx]
-            X_val_, y_val_ = X_train.iloc[valid_idx], y_train.iloc[valid_idx]
-            clf = get_fitted_catboost(params, X_train_, X_val_, y_train_, y_val_, categirical_columns)
-            predictions = clf.predict(X_test)
-            acc_scores[idx] = accuracy_score(y_test, predictions)
+        # acc_scores = np.empty(n_splits)
+        # folds = StratifiedKFold(n_splits=n_splits, random_state=SEED, shuffle=True)
+        # for idx, (train_idx, valid_idx) in enumerate(folds.split(X_train, y_train)):
+        #     X_train_, y_train_ = X_train.iloc[train_idx], y_train.iloc[train_idx]
+        #     X_val_, y_val_ = X_train.iloc[valid_idx], y_train.iloc[valid_idx]
+        #     clf = get_fitted_catboost(params, X_train_, X_val_, y_train_, y_val_, categirical_columns)
+        #     predictions = clf.predict(X_test)
+        #     acc_scores[idx] = accuracy_score(y_test, predictions)
         
-        print("Kfold mean acc: ", np.mean(acc_scores))
-        return np.mean(acc_scores)
+        # print("Kfold mean acc: ", np.mean(acc_scores))
+        # return np.mean(acc_scores)
         
-        # clf = get_fitted_catboost(params, X_train, X_test, y_train, y_test, categirical_columns)
+        clf = get_fitted_catboost(params, X_train, X_test, y_train, y_test, categirical_columns)
 
-        # predictions = clf.predict(X_test)
-        # return accuracy_score(y_test, predictions)
+        predictions = clf.predict(X_test)
+        return accuracy_score(y_test, predictions)
 
     study = optuna.create_study(study_name="obesity-accuracy", direction="maximize")
     study.optimize(objective, n_trials=n_trial)
@@ -72,13 +83,15 @@ def obtuna_tune():
     ============================================
     """
     )
-
+    best_model = get_fitted_catboost(best_study.params, X_train, X_test, y_train, y_test, categirical_columns)  # bestest
+    predictions = best_model.predict(test_csv)
     # predict
-    if best_study.value > 0.911:
-        best_model = get_fitted_catboost(best_study.params, X_train, X_test, y_train, y_test, categirical_columns)  # bestest
-        predictions = lbe.inverse_transform(best_model.predict(test_csv)[:, 0])
-        save_submit(path, f"{round(best_study.value,4)}_catboost", predictions)
-        save_model(path, f"{round(best_study.value,4)}_catboost", best_model)
+    if best_study.value > 0.91:
+        submission_csv = pd.read_csv(path + "sample_submission.csv")
+        submission_csv["NObeyesdad"] = predictions
+        submission_csv["NObeyesdad"] = submission_csv["NObeyesdad"].map(inverse_dict)
+        save_csv(path, f"{round(best_study.value,4)}_catboost_", submission_csv)
+        save_model(path, f"{round(best_study.value,4)}_catboost_", best_model)
 
 
 # ====================================================================================
@@ -127,10 +140,10 @@ def GridSearchCV_tune():
     save_submit(path, round(gsc.best_score_,4), predictions)
 
 # ====================================================================================
-patience = 10
-iterations = 300
-n_trial = 50
-n_splits = 6
+patience = 1
+iterations = 1
+n_trial = 1
+n_splits = 2
 # ====================================================================================
 
 # RUN
