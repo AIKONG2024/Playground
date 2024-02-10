@@ -4,8 +4,21 @@ import obesity03_train03_lgbm
 import obesity03_train04_rf
 from random import randint
 
-model_file_list= [obesity03_train01_catb.obtuna_tune() ,obesity03_train02_xgb.obtuna_tune(),
-                  obesity03_train03_lgbm.obtuna_tune(),obesity03_train04_rf.obtuna_tune()]
+model_file_list= [obesity03_train01_catb ,obesity03_train02_xgb,
+                  obesity03_train03_lgbm,obesity03_train04_rf]
+def do():
+    while 1 :
+        rand_idx = randint(0,3)
+        model_file = model_file_list[rand_idx]
+        print("================================")
+        print(model_file.__name__ + "START")
+        print("================================")
+        
+        model_file.obtuna_tune()
 
-while 1 :
-    model_file_list[randint(0,3,1)]
+def main():
+    do()
+    # GridSearchCV_tune()
+
+if __name__ == '__main__':
+    main()
