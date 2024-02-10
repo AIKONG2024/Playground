@@ -86,12 +86,12 @@ def obtuna_tune():
     # predict
     best_model = get_fitted_randomForest(best_study.params, X_train, X_test, y_train, y_test)  # bestest
     predictions = best_model.predict(test_csv)
-    # if best_study.value > 0.911:
-    submission_csv = pd.read_csv(path + "sample_submission.csv")
-    submission_csv["NObeyesdad"] = predictions
-    submission_csv["NObeyesdad"] = submission_csv["NObeyesdad"].map(inverse_dict)
-    save_csv(path, f"{round(best_study.value,4)}_rf_", submission_csv)
-    save_model(path, f"{round(best_study.value,4)}_tf_", best_model)
+    if best_study.value > 0.911:
+        submission_csv = pd.read_csv(path + "sample_submission.csv")
+        submission_csv["NObeyesdad"] = predictions
+        submission_csv["NObeyesdad"] = submission_csv["NObeyesdad"].map(inverse_dict)
+        save_csv(path, f"{round(best_study.value,4)}_rf_", submission_csv)
+        save_model(path, f"{round(best_study.value,4)}_tf_", best_model)
 
 
 # ====================================================================================
