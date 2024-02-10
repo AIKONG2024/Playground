@@ -1,9 +1,9 @@
 # https://www.kaggle.com/competitions/playground-series-s4e2
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from obesity01_data import lable_encoding, get_data
+from obesity01_data import lable_encoding, get_data, y_encoding
 from obesity02_models import get_catboost, get_fitted_catboost
-from obesity04_utils import save_submit, save_model
+from obesity04_utils import save_submit, save_model, save_csv
 from obesity00_seed import SEED
 
 # ====================================================================================
@@ -15,17 +15,30 @@ def obtuna_tune():
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
     train_csv = train_csv[train_csv["Age"] < 46]
-    train_csv['BMI'] =  train_csv['Weight'] / (train_csv['Height'] ** 2)
-    test_csv['BMI'] =  test_csv['Weight'] / (test_csv['Height'] ** 2)
-
+    # train_csv['BMI'] =  train_csv['Weight'] / (train_csv['Height'] ** 2)
+    # test_csv['BMI'] =  test_csv['Weight'] / (test_csv['Height'] ** 2)
+    levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
+    train_csv["CALC"] = train_csv["CALC"].map(levels)
+    train_csv["CAEC"] = train_csv["CAEC"].map(levels)
+    test_csv["CALC"] = test_csv["CALC"].map(levels)
+    test_csv["CAEC"] = test_csv["CAEC"].map(levels)
+    
+    #Meal_Habits
+    # train_csv['Meal_Habits'] = train_csv['FCVC'] * train_csv["NCP"]
+    # test_csv['Meal_Habits'] = test_csv['FCVC'] * test_csv["NCP"]
+    
+    # cat_feature = ['Gender','family_history_with_overweight','FAVC','SMOKE','SCC','MTRANS', 'CALC', 'CAEC']
     cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
-    datasets = get_data(train_csv)
 
+    train_csv["NObeyesdad"], inverse_dict = y_encoding(train_csv["NObeyesdad"])
+    
+    
+    X_train, X_test, y_train, y_test = get_data(train_csv)
     # Hyperparameter Optimization
     def objective(trial: optuna.Trial):
         params = {
             'iterations': iterations,  # High number of estimators
-            'learning_rate': trial.suggest_float('learning_rate', 0.0001, 0.1),
+            'learning_rate': trial.suggest_float('learning_rate', 0.001, 1),
             # 'depth': trial.suggest_int('depth', 3, 15),
             # 'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 0.01, 30.0),
             # 'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),
@@ -33,9 +46,8 @@ def obtuna_tune():
             'verbose': False,
             'task_type':"GPU"          
         }
-        clf = get_fitted_catboost(params, datasets, cat_features)
+        clf = get_fitted_catboost(params, X_train, X_test, y_train, y_test, cat_features)
 
-        X_test, y_test = datasets[1], datasets[3]
         predictions = clf.predict(X_test)
         return accuracy_score(y_test, predictions)
 
@@ -54,10 +66,13 @@ def obtuna_tune():
 
     # predict
     if best_study.value > 0.91:
-        best_model = get_fitted_catboost(best_study.params, datasets, cat_features)  # bestest
+        best_model = get_fitted_catboost(best_study.params, X_train, X_test, y_train, y_test, cat_features)  # bestest
         predictions = best_model.predict(test_csv)[:, 0]
-        save_submit(path, f"{round(best_study.value,4)}_catboost", predictions)
-        save_model(path, f"{round(best_study.value,4)}_catboost", best_model)
+        submission_csv = pd.read_csv(path + "sample_submission.csv")
+        submission_csv["NObeyesdad"] = predictions
+        submission_csv["NObeyesdad"] = submission_csv["NObeyesdad"].map(inverse_dict)
+        save_csv(path, f"{round(best_study.value,4)}_catboost_", submission_csv)
+        save_model(path, f"{round(best_study.value,4)}_catboost_", best_model)
 
 
 # ====================================================================================
