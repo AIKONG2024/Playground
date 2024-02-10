@@ -52,11 +52,11 @@ def obtuna_tune():
             'reg_alpha' : trial.suggest_float('reg_alpha',  1e-9, 1.0, log = True),
             'n_estimators' : iterations,
             'random_state' : SEED,
-            'boosting_type' : trial.suggest_categorical('boosting_type', ['gbdt', 'rf']),
+            'boosting_type' : 'gbdt',
             'imporance_type' : "feature_importances_",
             'device_type' : "gpu",
-            "objective": trial.suggest_categorical('objective', ["multiclass", 'multiclassova']) ,
-            "metric": trial.suggest_categorical('metric', ["multi_logloss", 'auc', 'gamma', 'l1', 'l2', 'cross_entropy', 'cross_entropy_lamda']),
+            # "objective": "multiclass" ,
+            # "metric": 'cross_entropy',
             'num_leaves': trial.suggest_int('num_leaves', 10, 1000),  
             'verbosity' : -1        
         }
