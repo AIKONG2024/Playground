@@ -7,6 +7,7 @@ from random import randint
 
 model_file_list= [obesity03_train01_catb ,obesity03_train02_xgb,
                   obesity03_train03_lgbm,obesity03_train04_rf]
+
 def do():
     while 1 :
         rand_idx = randint(0,3)

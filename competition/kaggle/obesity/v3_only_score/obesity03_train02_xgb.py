@@ -2,10 +2,10 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-from obesity01_data import lable_encoding, get_data, y_encoding
+from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing
 from obesity02_models import get_xgboost, get_fitted_xgboost
 from obesity04_utils import save_submit, save_model, save_csv
-from obesity00_seed import SEED
+from obesity00_constant import SEED, ITERATTIONS, PATIENCE, N_TRIAL, N_SPLIT
 
 #====================================================================================
 #obtuna Tunner 이용
@@ -17,18 +17,8 @@ def obtuna_tune():
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
     
-    train_csv = train_csv[train_csv["Age"] < 46]
-    # train_csv['BMI'] =  train_csv['Weight'] / (train_csv['Height'] ** 2)
-    # test_csv['BMI'] =  test_csv['Weight'] / (test_csv['Height'] ** 2)
-    levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
-    train_csv["CALC"] = train_csv["CALC"].map(levels)
-    train_csv["CAEC"] = train_csv["CAEC"].map(levels)
-    test_csv["CALC"] = test_csv["CALC"].map(levels)
-    test_csv["CAEC"] = test_csv["CAEC"].map(levels)
-    
-    #Meal_Habits
-    # train_csv['Meal_Habits'] = train_csv['FCVC'] * train_csv["NCP"]
-    # test_csv['Meal_Habits'] = test_csv['FCVC'] * test_csv["NCP"]
+    train_csv =  x_preprocessing(train_csv)
+    test_csv = x_preprocessing(test_csv)
     
     cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
     for feature in cat_features :
@@ -146,10 +136,10 @@ def GridSearchCV_tune():
 
 #====================================================================================
 
-patience = 2000
-iterations = 1000
-n_trial = 100
-n_splits = 5
+patience = PATIENCE
+iterations = ITERATTIONS
+n_trial = N_TRIAL
+n_splits = N_SPLIT
 
 #====================================================================================
 

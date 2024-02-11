@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import train_test_split
-from obesity00_seed import SEED
+from obesity00_constant import SEED
 
 
 def lable_encoding(encoder, data):
@@ -12,6 +12,21 @@ def lable_encoding(encoder, data):
     else:
         data = encoder.fit_transform(data.astype(str))
     return data, encoder
+
+def x_preprocessing(dataFame):
+    dataFame = dataFame[dataFame["Age"] < 46]
+    # train_csv['BMI'] =  train_csv['Weight'] / (train_csv['Height'] ** 2)
+    # test_csv['BMI'] =  test_csv['Weight'] / (test_csv['Height'] ** 2)
+    # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
+    # dataFame["CALC"] = dataFame["CALC"].map(levels)
+    # dataFame["CAEC"] = dataFame["CAEC"].map(levels)
+    # dataFame["CALC"] = dataFame["CALC"].map(levels)
+    # dataFame["CAEC"] = dataFame["CAEC"].map(levels)
+    
+    #Meal_Habits
+    # train_csv['Meal_Habits'] = train_csv['FCVC'] * train_csv["NCP"]
+    # test_csv['Meal_Habits'] = test_csv['FCVC'] * test_csv["NCP"]\
+    return dataFame
 
 def y_encoding(data):
     label_dict = {
