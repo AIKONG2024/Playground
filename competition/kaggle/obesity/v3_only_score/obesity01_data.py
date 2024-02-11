@@ -13,19 +13,20 @@ def lable_encoding(encoder, data):
         data = encoder.fit_transform(data.astype(str))
     return data, encoder
 
-def x_preprocessing(dataFame):
+def x_preprocessing(data:pd.DataFrame):
     # dataFame['BMI'] =  dataFame['Weight'] / (dataFame['Height'] ** 2)
     # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
     # dataFame["CALC"] = dataFame["CALC"].map(levels)
     # dataFame["CAEC"] = dataFame["CAEC"].map(levels)
     # dataFame['Meal_Habits'] = dataFame['FCVC'] * dataFame["NCP"]
-    return dataFame
+    return data
 
-def train_only_preprocessing(dataFrame):
-    dataFame = dataFame[dataFame["Age"] < 46]
-    return dataFrame  
+def train_only_preprocessing(data:pd.DataFrame):
+    data = data.drop_duplicates()
+    data = data[data["Age"] < 46]
+    return data  
 
-def y_encoding(data):
+def y_encoding(data:pd.DataFrame):
     label_dict = {
     'Insufficient_Weight': 0, 
     'Normal_Weight': 1,
@@ -39,8 +40,8 @@ def y_encoding(data):
     data = data.map(label_dict)
     return data , inverse_label_dict
 
-def get_data(train_data):
-    X, y = train_data.drop(["NObeyesdad"], axis=1), train_data.NObeyesdad
+def get_data(data:pd.DataFrame):
+    X, y = data.drop(["NObeyesdad"], axis=1), data.NObeyesdad
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=SEED, stratify=y
     )
