@@ -15,17 +15,13 @@ def lable_encoding(encoder, data):
 
 def x_preprocessing(dataFame):
     dataFame = dataFame[dataFame["Age"] < 46]
-    # train_csv['BMI'] =  train_csv['Weight'] / (train_csv['Height'] ** 2)
-    # test_csv['BMI'] =  test_csv['Weight'] / (test_csv['Height'] ** 2)
+    # dataFame['BMI'] =  dataFame['Weight'] / (dataFame['Height'] ** 2)
     # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
-    # dataFame["CALC"] = dataFame["CALC"].map(levels)
-    # dataFame["CAEC"] = dataFame["CAEC"].map(levels)
     # dataFame["CALC"] = dataFame["CALC"].map(levels)
     # dataFame["CAEC"] = dataFame["CAEC"].map(levels)
     
     #Meal_Habits
-    # train_csv['Meal_Habits'] = train_csv['FCVC'] * train_csv["NCP"]
-    # test_csv['Meal_Habits'] = test_csv['FCVC'] * test_csv["NCP"]\
+    # dataFame['Meal_Habits'] = dataFame['FCVC'] * dataFame["NCP"]
     return dataFame
 
 def y_encoding(data):

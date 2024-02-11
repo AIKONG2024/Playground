@@ -18,7 +18,6 @@ def obtuna_tune():
     test_csv = pd.read_csv(path + "test.csv")
     
     train_csv =  x_preprocessing(train_csv)
-    test_csv = x_preprocessing(test_csv)
     
     cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
     for feature in cat_features :
