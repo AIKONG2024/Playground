@@ -1,7 +1,7 @@
 # https://www.kaggle.com/competitions/playground-series-s4e2
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing
+from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing, train_only_preprocessing
 from obesity02_models import get_catboost, get_fitted_catboost
 from obesity04_utils import save_submit, save_model, save_csv
 from obesity00_constant import SEED, ITERATTIONS, PATIENCE, N_TRIAL, N_SPLIT
@@ -15,7 +15,9 @@ def obtuna_tune():
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
 
+    train_csv = train_only_preprocessing(train_csv)
     train_csv =  x_preprocessing(train_csv)
+    test_csv =  x_preprocessing(test_csv)
     
     cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
 

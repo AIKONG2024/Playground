@@ -14,15 +14,16 @@ def lable_encoding(encoder, data):
     return data, encoder
 
 def x_preprocessing(dataFame):
-    dataFame = dataFame[dataFame["Age"] < 46]
     # dataFame['BMI'] =  dataFame['Weight'] / (dataFame['Height'] ** 2)
     # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
     # dataFame["CALC"] = dataFame["CALC"].map(levels)
     # dataFame["CAEC"] = dataFame["CAEC"].map(levels)
-    
-    #Meal_Habits
     # dataFame['Meal_Habits'] = dataFame['FCVC'] * dataFame["NCP"]
     return dataFame
+
+def train_only_preprocessing(dataFrame):
+    dataFame = dataFame[dataFame["Age"] < 46]
+    return dataFrame  
 
 def y_encoding(data):
     label_dict = {
