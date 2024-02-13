@@ -16,10 +16,10 @@ def lable_encoding(encoder, data):
 def x_preprocessing(data:pd.DataFrame):
     data['BMI'] =  data['Weight'] / (data['Height'] ** 2)
     data = data.drop("Height", axis=1)
-    # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
-    # data["CALC"] = data["CALC"].map(levels)
-    # data["CAEC"] = data["CAEC"].map(levels)
-    # data['Meal_Habits'] = data['FCVC'] * data["NCP"]
+    levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
+    data["CALC"] = data["CALC"].map(levels)
+    data["CAEC"] = data["CAEC"].map(levels)
+    data['Meal_Habits'] = data['FCVC'] * data["NCP"]
     return data
 
 def train_only_preprocessing(data:pd.DataFrame):

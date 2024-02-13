@@ -40,15 +40,15 @@ def obtuna_tune():
     def objective(trial: optuna.Trial):
         params = {
             'grow_policy': trial.suggest_categorical('grow_policy', ["depthwise", "lossguide"]),
-            'n_estimators': trial.suggest_int('n_estimators', 200, 700), 
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 1.0),
-            'gamma' : trial.suggest_float('gamma', 1e-7, 0.001), #필수
+            'n_estimators': trial.suggest_int('n_estimators', 200, 600), 
+            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.5),
+            'gamma' : trial.suggest_float('gamma', 0.0001, 0.001), #필수
             'subsample': trial.suggest_float('subsample', 0.9, 1.0),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
-            'max_depth': trial.suggest_int('max_depth', 1, 3),#필수
-            'min_child_weight': trial.suggest_int('min_child_weight', 1, 40), #필수 
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.8, 1.0),
+            'max_depth': trial.suggest_int('max_depth', 1, 5),#필수
+            'min_child_weight': trial.suggest_int('min_child_weight', 1, 10), #필수 
             'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 1.0),
-            'reg_alpha': trial.suggest_float('reg_alpha', 0.01, 1.0,),    
+            'reg_alpha': trial.suggest_float('reg_alpha', 0.1, 1.0,),    
             'eval_metric' : 'auc',
             'booster' : 'gbtree',
             # 'verbosity' : 0,
