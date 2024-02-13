@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 from sklearn.model_selection import train_test_split
 from obesity00_constant import SEED
 
@@ -47,3 +47,14 @@ def get_data(data:pd.DataFrame):
     )
 
     return (X_train, X_test, y_train, y_test)
+
+def scaling(scaler, data:pd.DataFrame):
+    if scaler is None :
+        scaler = MinMaxScaler()
+        # scaler = StandardScaler()
+        # scaler = MaxAbsScaler()
+        # scaler = RobustScaler()
+        data = scaler.fit_transform(data.values.reshape(-1,1))
+    else:
+        data = scaler.transform(data.values.reshape(-1,1))
+    return data, scaler
