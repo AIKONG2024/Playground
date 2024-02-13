@@ -18,14 +18,13 @@ error_messages = {
     "type_error": "잘못된 타입이 사용되었습니다.",
 }
 
-error_cases = do_value_error,do_index_error, do_zero_division_error, do_type_error
+error_cases = (do_value_error,do_index_error, do_zero_division_error, do_type_error)
 
     
 #tuple
 # *args 튜플형태 - 몇개를 입력받을 지 모를때 사용, 언팩킹 1번
 # *kwarg 딕셔너리형태 - 몇개를 입력받을 지 모를때 사용, 언팩킹 2번
 def interrunt_error(*errors , **messages):
-    
     for error in errors:
         try :  
             error()
