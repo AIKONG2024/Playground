@@ -14,7 +14,7 @@ def obtuna_tune():
     path = "C:/_data/kaggle/obesity/"
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
-    train_csv = train_csv[train_csv["Age"] < 46]
+    # train_csv = train_csv[train_csv["Age"] < 46]
     train_csv['BMI'] =  train_csv['Weight'] / (train_csv['Height'] ** 2)
     test_csv['BMI'] =  test_csv['Weight'] / (test_csv['Height'] ** 2)
 

@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing, colume_preprocessing, scaling
+from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing, train_only_preprocessing
 from obesity02_models import get_xgboost, get_fitted_xgboost
 from obesity04_utils import save_submit, save_model, save_csv
 from obesity00_constant import SEED, ITERATTIONS, PATIENCE, N_TRIAL, N_SPLIT
@@ -17,50 +17,84 @@ def obtuna_tune():
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
     
-    # train_csv = colume_preprocessing(train_csv)
+    categorical_features = train_csv.columns[train_csv.dtypes=="object"].tolist()[:-1]
+    from sklearn.preprocessing import OneHotEncoder
     
-    train_csv =  x_preprocessing(train_csv)
-    test_csv =  x_preprocessing(test_csv)
+    encoder = OneHotEncoder(sparse=False)
+    encoder.fit(pd.concat([train_csv[categorical_features], test_csv[categorical_features]], axis=0))
+
+    train_encoded = encoder.transform(train_csv[categorical_features])
+    train_encoded_df = pd.DataFrame(train_encoded, columns=encoder.get_feature_names_out(categorical_features))
+    test_encoded = encoder.fit_transform(test_csv[categorical_features])
+    test_encoded_df = pd.DataFrame(test_encoded, columns=encoder.get_feature_names_out(categorical_features))
+    combine_columns = ['CALC_Always', 'CALC_Frequently']
+    train_encoded_df['CALC_A_F'] = train_encoded_df[combine_columns].sum(axis=1)
+    test_encoded_df['CALC_A_F'] = test_encoded_df[combine_columns].sum(axis=1)
+
+    train_encoded_df = train_encoded_df.drop(columns=combine_columns).set_index(train_csv.index)
+    test_encoded_df = test_encoded_df.drop(columns=combine_columns).set_index(test_csv.index)
     
-    cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
+    # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
+    # train_csv["CALC_ord"] = train_csv["CALC"].map(levels)
+    # test_csv["CALC_ord"] = test_csv["CALC"].map(levels)
+    # train_csv["CAEC_ord"] = train_csv["CAEC"].map(levels)
+    # test_csv["CAEC_ord"] = test_csv["CAEC"].map(levels)
+    train_csv = train_csv[train_csv['Age'] < 46]
+    
+    train_csv = pd.concat([train_csv.drop(categorical_features, axis=1), train_encoded_df], axis=1)
+    test_csv = pd.concat([test_csv.drop(categorical_features, axis=1), test_encoded_df], axis=1)
+    
+    train_csv['BMI'] = train_csv['Weight'] / (train_csv['Height'] ** 2)
+    test_csv['BMI'] = test_csv['Weight'] / (test_csv['Height'] ** 2)
+    
+    train_csv['Meal_Habits'] = train_csv['FCVC'] * train_csv['NCP']
+    test_csv['Meal_Habits'] = test_csv['FCVC'] * test_csv['NCP']
+
+    train_csv['Healthy_Nutrition_Habits'] = train_csv['FCVC'] / ( 2 * train_csv['FAVC_no'] - 1)
+    test_csv['Healthy_Nutrition_Habits'] = test_csv['FCVC'] / ( 2 * test_csv['FAVC_no'] - 1)
+
+    train_csv['Tech_Usage_Score'] = train_csv['TUE'] / train_csv['Age']
+    test_csv['Tech_Usage_Score'] = test_csv['TUE'] / test_csv['Age']
+    
+    cat_features = train_csv.select_dtypes(include='object').columns.values
     for feature in cat_features :
         train_csv[feature], lbe = lable_encoding(None,train_csv[feature]) 
-        if feature == "CALC" and "Always" not in lbe.classes_ :
-            lbe.classes_ = np.append(lbe.classes_, "Always")
-        test_csv[feature],_ = lable_encoding(lbe, test_csv[feature]) 
-               
-    # train_csv["NObeyesdad"], inverse_dict = y_encoding(train_csv["NObeyesdad"])
-    train_csv["NObeyesdad"], lbe = lable_encoding(None,train_csv["NObeyesdad"])
-    X_train, X_test, y_train, y_test, = get_data(train_csv)
+        if feature != "NObeyesdad":
+            test_csv[feature],_ = lable_encoding(lbe, test_csv[feature]) 
     
-    # from sklearn.preprocessing import MaxAbsScaler
-    # X_train = MaxAbsScaler().fit_transform(X_train)
-    # X_test = MaxAbsScaler().fit_transform(X_test)
-    # test_csv = MaxAbsScaler().fit_transform(test_csv)
-
+    # import matplotlib.pyplot as plt
+    # import seaborn as sns
+    # sns.set(font_scale=0.7)
+    # sns.heatmap(data=train_csv.corr(), square=True, annot=True, cbar=True) 
+    # plt.show()
+    
+    X_train, X_test, y_train, y_test = get_data(train_csv)
 
     # Hyperparameter Optimization
     # https://velog.io/@highway92/XGBoost-%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0%EB%93%A4
+    # https://www.kaggle.com/code/abdelrhmanelhelaly/91-5-accuracy
+    # https://www.kaggle.com/code/gabedossantos/eda-xgboost-91-5
     def objective(trial: optuna.Trial):
         params = {
-           'grow_policy': trial.suggest_categorical('grow_policy', ["depthwise", "lossguide"]),
-            'n_estimators': trial.suggest_int('n_estimators', 300, 2000), 
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.5),
-            'gamma' : trial.suggest_float('gamma', 0.0001, 0.001), #필수
-            'subsample': trial.suggest_float('subsample', 0.9, 1.0),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.8, 1.0),
-            'max_depth': trial.suggest_int('max_depth', 1, 5),#필수
-            'min_child_weight': trial.suggest_int('min_child_weight', 1, 10), #필수 
-            'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 1.0),
-            'reg_alpha': trial.suggest_float('reg_alpha', 0.1, 1.0,),    
-            'eval_metric' : 'auc',
+            'grow_policy': trial.suggest_categorical('grow_policy', ["depthwise", "lossguide"]),
+            'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+            'learning_rate': trial.suggest_float('learning_rate', 0.01, 1.0, log=True),
+            'gamma' : trial.suggest_float('gamma', 1e-9, 0.5),
+            'subsample': trial.suggest_float('subsample', 0.3, 1.0),
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.3, 1.0),
+            'max_depth': trial.suggest_int('max_depth', 0, 16),
+            'min_child_weight': trial.suggest_int('min_child_weight', 1, 7),
+            'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 100.0, log=True),
+            'reg_alpha': trial.suggest_float('reg_alpha', 1e-9, 100.0, log=True), 
+            'objective' : trial.suggest_categorical('objective', ['multi:sotfmax', 'multi:softprob']) ,
+            'eval_metric' :  trial.suggest_categorical('eval_metric', ["merror",'mlogloss', 'auc']),
             'booster' : 'gbtree',
-            # 'verbosity' : 0,
-            'objective' : trial.suggest_categorical('objective', ["multi:sotfmax", "multi:softprob"]),
+            'verbosity' : 0,
             'device_type' : 'GPU',
             'device' : 'cuda',
+            'tree_method' : 'hist',
             # 'enable_categorical' : True,
-            'max_cat_to_onehot' : 1,
+            # 'max_cat_to_onehot' : 1,
             'early_stopping_rounds' : patience,
             # 'importance_type' : 'weight',
             'random_state' : SEED,
@@ -86,12 +120,13 @@ def obtuna_tune():
 
     # predict
     best_model = get_fitted_xgboost(best_study.params, X_train, X_test, y_train, y_test)  # bestest
+    # print(best_model.feature_importances_)
     predictions = best_model.predict(test_csv)
-    # if best_study.value > 0.91:
     submission_csv = pd.read_csv(path + "sample_submission.csv")
     submission_csv["NObeyesdad"] = lbe.inverse_transform(predictions) 
     # submission_csv["NObeyesdad"] = predictions
     # submission_csv["NObeyesdad"] = submission_csv["NObeyesdad"].map(inverse_dict)
+    
     save_csv(path, f"{round(best_study.value,4)}_xgb_", submission_csv)
     save_model(path, f"{round(best_study.value,4)}_xgb_", best_model)
 
@@ -162,3 +197,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
+    # Trial 12 finished with value: 0.9150610147719974 and parameters: {'grow_policy': 'lossguide', 'n_estimators': 996, 'learning_rate': 0.022115905415387556, 'gamma': 0.1299998264675535, 'subsample': 0.7591158724763973, 
+    # 'colsample_bytree': 0.3015166580857436, 'max_depth': 7, 'min_child_weight': 7, 'reg_lambda': 0.035320295955169626, 'reg_alpha': 1.645889988069947, 'objective': 'multi:softprob', 'eval_metric': 'auc'}. Best is trial 12 with value: 0.9150610147719974.

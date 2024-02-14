@@ -10,20 +10,29 @@ def lable_encoding(encoder, data):
         encoder = LabelEncoder()
         data = encoder.fit_transform(data.astype(str))
     else:
-        data = encoder.fit_transform(data.astype(str))
+        data = encoder.transform(data.astype(str))
     return data, encoder
 
 def x_preprocessing(data:pd.DataFrame):
-    # dataFame['BMI'] =  dataFame['Weight'] / (dataFame['Height'] ** 2)
-    levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
-    data["CALC"] = data["CALC"].map(levels)
-    data["CAEC"] = data["CAEC"].map(levels)
+    data['BMI'] =  data['Weight'] / (data['Height'] ** 2)
+    # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
+    # data["CALC"] = data["CALC"].map(levels)
+    # data["CAEC"] = data["CAEC"].map(levels)
     # data['Meal_Habits'] = data['FCVC'] * data["NCP"]
     return data
 
-def train_only_preprocessing(data:pd.DataFrame):
+def colume_preprocessing(data:pd.DataFrame):
     data = data.drop_duplicates()
-    data = data[data["Age"] < 46]
+    # data = data[data["Age"] < 46]
+    # data.loc[data['Age'] <= 10,'Age'] = 1
+    # data.loc[(data['Age'] > 10) & (data['Age'] <= 20), 'Age' ] = 10
+    # data.loc[(data['Age'] > 20) & (data['Age'] <= 30), 'Age' ] = 20
+    # data.loc[(data['Age'] > 30) & (data['Age'] <= 40), 'Age' ] = 30
+    # data.loc[(data['Age'] > 40) & (data['Age'] <= 50), 'Age' ] = 40
+    # data.loc[data['Age'] > 50,'Age'] = 50
+    
+    data.loc[(data['Age'] <= 30), 'Age' ] = 10
+    data.loc[data['Age'] > 30, 'Age' ] = 50
     return data  
 
 def y_encoding(data:pd.DataFrame):
@@ -48,7 +57,7 @@ def get_data(data:pd.DataFrame):
 
     return (X_train, X_test, y_train, y_test)
 
-def scaling(scaler, data:pd.DataFrame):
+def scaling(scaler, data):
     if scaler is None :
         scaler = MinMaxScaler()
         # scaler = StandardScaler()

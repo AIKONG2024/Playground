@@ -1,7 +1,8 @@
 # https://www.kaggle.com/competitions/playground-series-s4e2
 import pandas as pd
+import numpy as np
 from sklearn.metrics import accuracy_score
-from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing, train_only_preprocessing, scaling
+from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing, colume_preprocessing, scaling
 from obesity02_models import get_lightgbm, get_fitted_lightgbm
 from obesity04_utils import save_submit, save_model, save_csv
 from obesity00_constant import SEED, ITERATTIONS, PATIENCE, N_TRIAL, N_SPLIT
@@ -17,21 +18,27 @@ def obtuna_tune():
     train_csv = pd.read_csv(path + "train.csv")
     test_csv = pd.read_csv(path + "test.csv")
     
-    train_csv = train_only_preprocessing(train_csv)
+    train_csv = colume_preprocessing(train_csv)
+    test_csv = colume_preprocessing(test_csv)
+    
     train_csv =  x_preprocessing(train_csv)
     test_csv =  x_preprocessing(test_csv)
     
     cat_features = train_csv.select_dtypes(include='object').columns.values[:-1]
     for feature in cat_features :
         train_csv[feature], lbe = lable_encoding(None,train_csv[feature]) 
+        if feature == "CALC" and "Always" not in lbe.classes_ :
+            lbe.classes_ = np.append(lbe.classes_, "Always")
         test_csv[feature],_ = lable_encoding(lbe, test_csv[feature]) 
-    scaling_features = ["Weight", "Height"]
-    for feature in scaling_features :
-        train_csv[feature], scaler = scaling(None, train_csv[feature])
-        test_csv[feature], _ = scaling(scaler, test_csv[feature])
-    train_csv["NObeyesdad"], inverse_dict = y_encoding(train_csv["NObeyesdad"])
+    
+    # train_csv["NObeyesdad"], inverse_dict = y_encoding(train_csv["NObeyesdad"])
+    train_csv["NObeyesdad"], lbe = lable_encoding(None,train_csv["NObeyesdad"])
     
     X_train, X_test, y_train, y_test = get_data(train_csv)
+            
+    X_train, scaler = scaling(None, X_train)
+    X_test, _ = scaling(scaler, X_test)
+    test_csv, _ = scaling(scaler, test_csv)
 
     # Hyperparameter Optimization
     def objective(trial: optuna.Trial):
@@ -71,7 +78,9 @@ def obtuna_tune():
     predictions = best_model.predict(test_csv)
     if best_study.value > 0.91:
         submission_csv = pd.read_csv(path + "sample_submission.csv")
-        submission_csv["NObeyesdad"] = predictions
+        submission_csv["NObeyesdad"] = lbe.inverse_transform(predictions) 
+        # submission_csv["NObeyesdad"] = predictions
+        # submission_csv["NObeyesdad"] = submission_csv["NObeyesdad"].map(inverse_dict)
         submission_csv["NObeyesdad"] = submission_csv["NObeyesdad"].map(inverse_dict)
         save_csv(path, f"{round(best_study.value,4)}_light_gbm", submission_csv)
         save_model(path, f"{round(best_study.value,4)}_light_gbm", best_model)
