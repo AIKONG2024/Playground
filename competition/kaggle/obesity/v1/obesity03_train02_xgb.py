@@ -38,7 +38,7 @@ def obtuna_tune():
             # 'colsample_bytree': trial.suggest_float('colsample_bytree', 0.25, 1.0),
             'max_depth': trial.suggest_int('max_depth', 0, 50),#필수
             'min_child_weight': trial.suggest_int('min_child_weight', 1, 40), #필수 
-            # 'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 10.0, log=True),
+            # 'reg_lambda': trial.suggest_float('reg_lambda',e-9, 10.0, log=True),
             # 'reg_alpha': trial.suggest_float('reg_alpha', 1e-9, 10.0, log=True),    
             'eval_metric' : 'auc',
             'booster' : 'gbtree',
