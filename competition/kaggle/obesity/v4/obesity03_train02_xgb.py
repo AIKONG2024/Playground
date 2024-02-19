@@ -39,7 +39,7 @@ def obtuna_tune():
     # test_csv["CALC_ord"] = test_csv["CALC"].map(levels)
     # train_csv["CAEC_ord"] = train_csv["CAEC"].map(levels)
     # test_csv["CAEC_ord"] = test_csv["CAEC"].map(levels)
-    train_csv = train_csv[train_csv['Age'] < 46]
+    # train_csv = train_csv[train_csv['Age'] < 46]
     
     train_csv = pd.concat([train_csv.drop(categorical_features, axis=1), train_encoded_df], axis=1)
     test_csv = pd.concat([test_csv.drop(categorical_features, axis=1), test_encoded_df], axis=1)

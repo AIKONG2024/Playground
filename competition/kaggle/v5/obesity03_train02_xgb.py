@@ -34,11 +34,11 @@ def obtuna_tune():
     train_encoded_df = train_encoded_df.drop(columns=combine_columns).set_index(train_csv.index)
     test_encoded_df = test_encoded_df.drop(columns=combine_columns).set_index(test_csv.index)
     
-    # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
-    # train_csv["CALC_ord"] = train_csv["CALC"].map(levels)
-    # test_csv["CALC_ord"] = test_csv["CALC"].map(levels)
-    # train_csv["CAEC_ord"] = train_csv["CAEC"].map(levels)
-    # test_csv["CAEC_ord"] = test_csv["CAEC"].map(levels)
+    levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
+    train_csv["CALC_ord"] = train_csv["CALC"].map(levels)
+    test_csv["CALC_ord"] = test_csv["CALC"].map(levels)
+    train_csv["CAEC_ord"] = train_csv["CAEC"].map(levels)
+    test_csv["CAEC_ord"] = test_csv["CAEC"].map(levels)
     train_csv = train_csv[train_csv['Age'] < 46]
     
     train_csv = pd.concat([train_csv.drop(categorical_features, axis=1), train_encoded_df], axis=1)

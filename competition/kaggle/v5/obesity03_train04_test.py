@@ -2,7 +2,7 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from obesity01_data import lable_encoding, get_data, y_encoding, x_preprocessing, train_only_preprocessing
-from obesity02_models import get_randomForest, get_fitted_randomForest
+from obesity02_models import get_randomForest, get_fitted_randomForest, get_xgboost
 from obesity04_utils import save_model,save_submit, save_csv
 from obesity00_constant import SEED, ITERATTIONS, PATIENCE, N_TRIAL, N_SPLIT
 # ====================================================================================
@@ -64,7 +64,7 @@ def test():
     
     X_train, X_test, y_train, y_test = get_data(train_csv)
     
-    rf = get_randomForest(params={})
+    rf = get_xgboost(params={})
     rf.fit(X_train, y_train)
     print(train_csv.columns)
     print(rf.feature_importances_)

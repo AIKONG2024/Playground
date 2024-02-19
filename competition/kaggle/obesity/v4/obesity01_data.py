@@ -23,7 +23,7 @@ def x_preprocessing(data:pd.DataFrame):
 
 def train_only_preprocessing(data:pd.DataFrame):
     data = data.drop_duplicates()
-    data = data[data["Age"] < 45]
+    # data = data[data["Age"] < 45]
     return data  
 
 def y_encoding(data:pd.DataFrame):
@@ -43,7 +43,19 @@ def y_encoding(data:pd.DataFrame):
 def get_data(data:pd.DataFrame):
     X, y = data.drop(["NObeyesdad"], axis=1), data.NObeyesdad
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=SEED, stratify=y
+        X, y, test_size=0.4, random_state=SEED, stratify=y
     )
 
     return (X_train, X_test, y_train, y_test)
+
+def get_data_val(data:pd.DataFrame):
+    X, y = data.drop(["NObeyesdad"], axis=1), data.NObeyesdad
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.6, random_state=SEED, stratify=y
+    )
+    
+    X_test, X_val, y_test, y_val = train_test_split(
+        X_test, y_test, test_size=0.4, random_state=SEED, stratify=y_test
+    )
+
+    return (X_train, X_test, X_val, y_train, y_test, y_val)
