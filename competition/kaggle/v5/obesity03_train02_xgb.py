@@ -34,12 +34,11 @@ def obtuna_tune():
     train_encoded_df = train_encoded_df.drop(columns=combine_columns).set_index(train_csv.index)
     test_encoded_df = test_encoded_df.drop(columns=combine_columns).set_index(test_csv.index)
     
-    # levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
-    # train_csv["CALC_ord"] = train_csv["CALC"].map(levels)
-    # test_csv["CALC_ord"] = test_csv["CALC"].map(levels)
-    # train_csv["CAEC_ord"] = train_csv["CAEC"].map(levels)
-    # test_csv["CAEC_ord"] = test_csv["CAEC"].map(levels)
-    train_csv = train_csv[train_csv['Age'] < 46]
+    levels = {"Always": 3, "Frequently": 2, "Sometimes": 1, "no": 0}
+    train_csv["CALC_ord"] = train_csv["CALC"].map(levels)
+    test_csv["CALC_ord"] = test_csv["CALC"].map(levels)
+    train_csv["CAEC_ord"] = train_csv["CAEC"].map(levels)
+    test_csv["CAEC_ord"] = test_csv["CAEC"].map(levels)
     
     train_csv = pd.concat([train_csv.drop(categorical_features, axis=1), train_encoded_df], axis=1)
     test_csv = pd.concat([test_csv.drop(categorical_features, axis=1), test_encoded_df], axis=1)
@@ -47,11 +46,11 @@ def obtuna_tune():
     train_csv['BMI'] = train_csv['Weight'] / (train_csv['Height'] ** 2)
     test_csv['BMI'] = test_csv['Weight'] / (test_csv['Height'] ** 2)
     
-    train_csv['Meal_Habits'] = train_csv['FCVC'] * train_csv['NCP']
-    test_csv['Meal_Habits'] = test_csv['FCVC'] * test_csv['NCP']
+    # train_csv['Meal_Habits'] = train_csv['FCVC'] * train_csv['NCP']
+    # test_csv['Meal_Habits'] = test_csv['FCVC'] * test_csv['NCP']
 
-    train_csv['Healthy_Nutrition_Habits'] = train_csv['FCVC'] / ( 2 * train_csv['FAVC_no'] - 1)
-    test_csv['Healthy_Nutrition_Habits'] = test_csv['FCVC'] / ( 2 * test_csv['FAVC_no'] - 1)
+    # train_csv['Healthy_Nutrition_Habits'] = train_csv['FCVC'] / ( 2 * train_csv['FAVC_no'] - 1)
+    # test_csv['Healthy_Nutrition_Habits'] = test_csv['FCVC'] / ( 2 * test_csv['FAVC_no'] - 1)
 
     train_csv['Tech_Usage_Score'] = train_csv['TUE'] / train_csv['Age']
     test_csv['Tech_Usage_Score'] = test_csv['TUE'] / test_csv['Age']
@@ -90,7 +89,6 @@ def obtuna_tune():
             'eval_metric' :  trial.suggest_categorical('eval_metric', ["merror",'mlogloss', 'auc']),
             'booster' : 'gbtree',
             'verbosity' : 0,
-            'device_type' : 'GPU',
             'device' : 'cuda',
             'tree_method' : 'hist',
             # 'enable_categorical' : True,

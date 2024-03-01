@@ -6,6 +6,7 @@ from obesity01_data import lable_encoding, get_data
 from obesity02_models import get_xgboost, get_fitted_xgboost
 from obesity04_utils import save_submit, save_model
 from obesity00_seed import SEED
+from sklearn.preprocessing import LabelEncoder
 
 #====================================================================================
 #obtuna Tunner 이용
@@ -20,6 +21,12 @@ def obtuna_tune():
     train_csv = train_csv[train_csv["Age"] < 46]
     train_csv['BMI'] =  train_csv['Weight'] / (train_csv['Height'] ** 2)
     test_csv['BMI'] =  test_csv['Weight'] / (test_csv['Height'] ** 2)
+    
+    lbe= LabelEncoder()
+    train_gender = lbe.fit_transform(train_csv['Gender'])
+    test_gender = lbe.transform(test_csv['Gender'])
+    train_csv['BFP'] = (1.2*train_csv['BMI']) + (0.23*train_csv['Age']) - ((train_gender * 1) + (train_gender + 1)) * 5.4
+    test_csv['BFP'] = (1.2*test_csv['BMI']) + (0.23*test_csv['Age']) - ((test_gender * 1) + (test_gender + 1)) * 5.4
     
     features = ['Gender','family_history_with_overweight','FAVC','CAEC',
                                            'SMOKE','SCC','CALC','MTRANS']
@@ -73,9 +80,9 @@ def obtuna_tune():
     # predict
     best_model = get_fitted_xgboost(best_study.params, datasets)  # bestest
     predictions = encoder.inverse_transform(best_model.predict(test_csv))
-    if best_study.value > 0.91:
-        save_submit(path, f"{round(best_study.value,4)}_xboost", predictions)
-        save_model(path, f"{round(best_study.value,4)}_xboost", best_model)
+    save_submit(path, f"{round(best_study.value,4)}_xboost", predictions)
+    save_model(path, f"{round(best_study.value,4)}_xboost", best_model)
+        
 
     
 #====================================================================================
@@ -130,7 +137,7 @@ def GridSearchCV_tune():
 
 #====================================================================================
 
-patience = 2000
+patience = 300
 iterations = 300
 n_trial = 100
 n_splits = 5
@@ -139,7 +146,8 @@ n_splits = 5
 
 # RUN
 def main():
-    obtuna_tune()
+    while 1 : 
+        obtuna_tune()
     # GridSearchCV_tune()
 
 if __name__ == '__main__':
