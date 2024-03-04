@@ -14,7 +14,6 @@ import test_module
 
 
 print(test_module.power(10,3))
-=
 
 
 

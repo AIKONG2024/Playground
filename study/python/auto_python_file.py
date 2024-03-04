@@ -49,3 +49,4 @@ run(img_sizes, batch_sizes, epoch_numbers)
 
 
 # run(img_sizes, batch_sizes, epoch_numbers, pretrained_w, datasets_yaml, cfg_models, path)
+#test
