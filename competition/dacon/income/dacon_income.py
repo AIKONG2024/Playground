@@ -25,8 +25,8 @@ import pandas as pd
 import numpy as np
 from  xgboost import XGBRegressor
 import optuna
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split, KFold
+from sklearn.metrics import mean_squared_error, r2_score
 
 path = 'C:/_data/dacon/income/'
 SEED = 42
@@ -46,41 +46,41 @@ for feature in categorical_features :
 X = train_csv.drop(["Income"], axis=1)
 y = train_csv['Income']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
+X, X_test, y, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
 
-#모델 구성
-# model = XGBRegressor()
+def objective(trial):
+    params = {
+        'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+        'learning_rate': trial.suggest_float('learning_rate', 0.01, 1.0, log=True),
+        'gamma': trial.suggest_float('gamma', 1e-9, 0.5),
+        'subsample': trial.suggest_float('subsample', 0.3, 1.0),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.3, 1.0),
+        'max_depth': trial.suggest_int('max_depth', 0, 16),
+        'min_child_weight': trial.suggest_int('min_child_weight', 1, 7),
+        'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 100.0, log=True),
+        'reg_alpha': trial.suggest_float('reg_alpha', 1e-9, 100.0, log=True),
+        'verbosity': 0,
+        'random_state': SEED,
+        'tree_method': 'hist',
+        'enable_categorical': True,
+    }
+    
+    skf = KFold(n_splits=5, shuffle=True, random_state=SEED)
+    cv_scores = np.empty(5)
+    for idx, (train_idx, test_idx) in enumerate(skf.split(X, y)):
+        X_train, X_val = X.iloc[train_idx], X.iloc[test_idx]
+        y_train, y_val = y.iloc[train_idx], y.iloc[test_idx]
+    
+        model = XGBRegressor(**params)
+        model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10, eval_metric="rmse", verbose=False)
+        predictions = model.predict(X_val)
+        cv_scores[idx] = np.sqrt(mean_squared_error(y_val, predictions))  # RMSE 계산
+    
+    return np.mean(cv_scores)
 
-# def objective(trial: optuna.Trial):
-#         params = {
-#             'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
-#             'learning_rate': trial.suggest_float('learning_rate', 0.01, 1.0, log=True),
-#             'gamma' : trial.suggest_float('gamma', 1e-9, 0.5),
-#             'subsample': trial.suggest_float('subsample', 0.3, 1.0),
-#             'colsample_bytree': trial.suggest_float('colsample_bytree', 0.3, 1.0),
-#             'max_depth': trial.suggest_int('max_depth', 0, 16),
-#             'min_child_weight': trial.suggest_int('min_child_weight', 1, 7),
-#             'reg_lambda': trial.suggest_float('reg_lambda', 1e-9, 100.0, log=True),
-#             'reg_alpha': trial.suggest_float('reg_alpha', 1e-9, 100.0, log=True), 
-#             'eval_metric' :  'rmse',
-#             'verbosity' : 0,
-#             'device' : 'cuda',
-#             'tree_method' : 'hist',
-#             # 'enable_categorical' : True,
-#             # 'max_cat_to_onehot' : 1,
-#             'early_stopping_rounds' : 10,
-#             # 'importance_type' : 'weight',
-#             'random_state' : SEED,
-#         }
-        
-#         model = XGBRegressor(**params)
-#         model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose= False)
-#         predictions = model.predict(X_test)
-#         return mean_squared_error(y_test, predictions)
-
-# study = optuna.create_study(study_name="obesity-accuracy", direction="maximize")
-# study.optimize(objective, n_trials=100)
-# best_study = study.best_trial
+study = optuna.create_study(study_name="obesity-accuracy", direction="minimize")
+study.optimize(objective, n_trials=50)
+best_study = study.best_trial
 
 # print(
 # f"""
@@ -93,13 +93,15 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # )
 
 # predict
-# best_param = best_study.params
-model = XGBRegressor()
+best_param = best_study.params
+model = XGBRegressor(**best_param)
 model.set_params(enable_categorical = True)
-model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
+model.fit(X, y, eval_set=[(X_test, y_test)], verbose=False)
 print(model.score(X_test, y_test))
+model.predict(X_test)
+
 
 submission_csv = pd.read_csv(path + "sample_submission.csv")
 predictions = model.predict(test_csv)
 submission_csv["Income"] = predictions
-submission_csv.to_csv(path + "sample_submission_pred.csv", index=False)
+submission_csv.to_csv(path + "sample_submission_pred2.csv", index=False)
