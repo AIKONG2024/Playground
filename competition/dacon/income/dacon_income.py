@@ -36,10 +36,12 @@ import numpy as np
 from  xgboost import XGBRegressor
 import optuna
 from sklearn.model_selection import train_test_split, KFold
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from lightgbm import LGBMRegressor
+from catboost import CatBoostRegressor
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -49,16 +51,11 @@ N_SPLITS = 8
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
 
-print(train_csv.shape) #(20000, 22)
-print(test_csv.shape) #(10000, 21)
+# print(train_csv.shape) #(20000, 22)
+# print(test_csv.shape) #(10000, 21)
 
 # print(train_csv.Income_Status.head(50))
 lbe = LabelEncoder()
-
-print(np.unique(train_csv['Household_Status']))
-print("===================")
-print(np.unique(test_csv['Household_Status'].astype(str)))
-print("===================")
 
 categorical_features = train_csv.select_dtypes(include='object').columns.values
 lbe = LabelEncoder()
@@ -68,7 +65,6 @@ for feature in categorical_features:
     for label in test_csv[feature]: 
         if label not in lbe.classes_:
             lbe.classes_ = np.append(lbe.classes_,label)
-            print(lbe.classes_)   
     test_csv[feature] = lbe.transform(test_csv[feature])
 
 X = train_csv.drop(["Income"], axis=1)
@@ -88,6 +84,12 @@ y_filtered = y.loc[X_filtered.index]
 X = X.interpolate(method='linear', limit_direction='forward', axis=0)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
+
+scaler = StandardScaler()
+
+x_train = pd.DataFrame(scaler.fit_transform(X_train), columns = X.columns)
+x_test = pd.DataFrame(scaler.transform(X_test), columns = X.columns)
+
 ####################################
 # def objective(trial):
 #     params = {
@@ -143,19 +145,35 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # model.fit(X, y, eval_set=[(X_test, y_test)], verbose=False)
 # print(model.score(X_test, y_test))
 # model.predict(X_test)
-###########################################################
-# model = RandomForestRegressor()
-# model.fit(X_train, y_train)
-# print(model.score(X_test, y_test))
-# pred = model.predict(X_test)
-# print(f'rmse : {np.sqrt(mean_squared_error(pred, y_test))}')
+
+##########################################################
+model = RandomForestRegressor(random_state=SEED)
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+print(f'rmse : {np.sqrt(mean_squared_error(pred, y_test))}')
+# rmse : 614.8712669686158
 #######################################
-model = LGBMRegressor(random_state=SEED)
-model.fit(X, y, eval_set=[(X_test, y_test)])
-print(model.score(X_test, y_test))
+model = XGBRegressor(seed = SEED)
+model.set_params(enable_categorical = True)
+model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
 pred = model.predict(X_test)
 score = np.sqrt(mean_squared_error(pred, y_test))
 print(f'rmse : {score}')
+#rmse : 610.7574298545074
+#######################################
+model = LGBMRegressor(random_state=SEED)
+model.fit(X_train, y_train, eval_set=[(X_test, y_test)])
+pred = model.predict(X_test)
+score = np.sqrt(mean_squared_error(pred, y_test))
+print(f'rmse : {score}')
+# rmse : 590.1690312701155
+###################################
+model = CatBoostRegressor(random_seed=SEED, silent=True)
+model.fit(X_train, y_train, eval_set=[(X_test, y_test)])
+pred = model.predict(X_test)
+score = np.sqrt(mean_squared_error(pred, y_test))
+print(f'rmse : {score}')
+# rmse : 591.751313168191
 
 import time
 timestr = time.strftime("%Y%m%d%H%M%S")
@@ -164,4 +182,4 @@ save_name = timestr
 submission_csv = pd.read_csv(path + "sample_submission.csv")
 predictions = model.predict(test_csv)
 submission_csv["Income"] = predictions
-submission_csv.to_csv(path + f"sample_submission_pred{save_name}_{score}.csv", index=False)
+# submission_csv.to_csv(path + f"sample_submission_pred{save_name}_{score}.csv", index=False)
