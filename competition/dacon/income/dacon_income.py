@@ -147,26 +147,26 @@ x_test = pd.DataFrame(scaler.transform(X_test), columns = X.columns)
 # model.predict(X_test)
 
 ##########################################################
-model = RandomForestRegressor(random_state=SEED)
-model.fit(X_train, y_train)
-pred = model.predict(X_test)
-print(f'rmse : {np.sqrt(mean_squared_error(pred, y_test))}')
+# model = RandomForestRegressor(random_state=SEED)
+# model.fit(X_train, y_train)
+# pred = model.predict(X_test)
+# print(f'rmse : {np.sqrt(mean_squared_error(pred, y_test))}')
 # rmse : 614.8712669686158
 #######################################
-model = XGBRegressor(seed = SEED)
-model.set_params(enable_categorical = True)
-model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
-pred = model.predict(X_test)
-score = np.sqrt(mean_squared_error(pred, y_test))
-print(f'rmse : {score}')
-#rmse : 610.7574298545074
+# model = XGBRegressor(seed = SEED)
+# model.set_params(enable_categorical = True)
+# model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
+# pred = model.predict(X_test)
+# score = np.sqrt(mean_squared_error(pred, y_test))
+# print(f'rmse : {score}')
+# #rmse : 610.7574298545074
 #######################################
-model = LGBMRegressor(random_state=SEED)
-model.fit(X_train, y_train, eval_set=[(X_test, y_test)])
-pred = model.predict(X_test)
-score = np.sqrt(mean_squared_error(pred, y_test))
-print(f'rmse : {score}')
-# rmse : 590.1690312701155
+# model = LGBMRegressor(random_state=SEED)
+# model.fit(X_train, y_train, eval_set=[(X_test, y_test)])
+# pred = model.predict(X_test)
+# score = np.sqrt(mean_squared_error(pred, y_test))
+# print(f'rmse : {score}')
+# # rmse : 590.1690312701155
 ###################################
 model = CatBoostRegressor(random_seed=SEED, silent=True)
 model.fit(X_train, y_train, eval_set=[(X_test, y_test)])
@@ -182,4 +182,4 @@ save_name = timestr
 submission_csv = pd.read_csv(path + "sample_submission.csv")
 predictions = model.predict(test_csv)
 submission_csv["Income"] = predictions
-# submission_csv.to_csv(path + f"sample_submission_pred{save_name}_{score}.csv", index=False)
+submission_csv.to_csv(path + f"sample_submission_pred{save_name}_{score}.csv", index=False)

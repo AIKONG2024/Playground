@@ -75,7 +75,7 @@ train_df = train_df[train_df['Losses'] < 3000]
 
 #!!!
 #Martial_Status - 순서형
-print(np.unique(train_df['Citizenship']))
+# print(np.unique(train_df['Citizenship']))
 
 #인코딩
 # 명목형 데이터 처리
@@ -117,11 +117,6 @@ for feature in categorical_features:
         lbe.classes_ = np.append(lbe.classes_, new_label)
     test_df[feature] = lbe.transform(test_df[feature])
 
-#외의 데이터
-
-#이상치 분석
-
-
 #데이터 증폭
 
 #추가 컬럼 생성
@@ -136,12 +131,10 @@ scaler = StandardScaler()
 x_train = pd.DataFrame(scaler.fit_transform(X_train), columns = X.columns)
 x_test = pd.DataFrame(scaler.transform(X_test), columns = X.columns)
 
+
+####################################################################################
+# test
 model = RandomForestRegressor(random_state=SEED)
 model.fit(X_train, y_train)
 pred = model.predict(X_test)
 print(f'rmse : {np.sqrt(mean_squared_error(pred, y_test))}')
-
-
-#627
-#625
-#
