@@ -25,7 +25,7 @@ def outliers(data):
 while 1 :
     #데이터
     path = 'C:/_data/dacon/income/'
-    SEED = random.randint(0,300000000)
+    SEED = random.randint(0,112)
     print('==============================')
     print('[seed] : ', SEED)
     #read 
