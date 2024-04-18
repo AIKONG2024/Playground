@@ -32,6 +32,15 @@ test_df = pd.read_csv(path + "test.csv", index_col=0)
 
 train_df = train_df.drop(['Gains', 'Losses','Dividends'], axis=1)
 test_df = test_df.drop(['Gains', 'Losses', 'Dividends'], axis=1)
+#인코딩
+# 명목형 데이터 처리
+nominal_columns = ['Gender', 'Race', 'Employment_Status', 'Industry_Status','Occupation_Status','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)']
+one_hot_encoder = OneHotEncoder(sparse=False)
+ohe_train = one_hot_encoder.fit_transform(train_df[nominal_columns])
+ohe_test = one_hot_encoder.transform(test_df[nominal_columns])
+nominal_train_df = pd.DataFrame(ohe_train, columns=one_hot_encoder.get_feature_names_out(nominal_columns), index=train_df.index)
+nominal_test_df = pd.DataFrame(ohe_test, columns=one_hot_encoder.get_feature_names_out(nominal_columns), index=test_df.index)
+
 
 #!!!
 #Martial_Status - 순서형
