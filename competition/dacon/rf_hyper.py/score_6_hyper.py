@@ -26,7 +26,7 @@ def objective(trial):
         'min_weight_fraction_leaf': 0.0,
         'max_features': trial.suggest_categorical(name="max_features", choices=[None]),
         'max_leaf_nodes': trial.suggest_int(name="max_leaf_nodes", low=2, high=100, step=2),
-        'min_impurity_decrease': 0.013,
+        'min_impurity_decrease': 0.023,
         'bootstrap': True,
         'random_state': SEED
     }
