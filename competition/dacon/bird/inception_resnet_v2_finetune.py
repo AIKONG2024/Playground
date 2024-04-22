@@ -18,9 +18,9 @@ def combined_generator(gen1, gen2):
             x2, y2 = next(gen2)
             yield x2, y2
 # Set random seed for reproducibility
-SEED = 42
+SEED = 1234
 IMAGE_SIZE = (224,224)
-FILTERS = 8
+FILTERS = 16
 BATCH_SIZE = 32
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
