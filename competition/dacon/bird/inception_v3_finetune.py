@@ -20,8 +20,8 @@ def combined_generator(gen1, gen2):
 # Set random seed for reproducibility
 SEED = 42
 IMAGE_SIZE = (224,224)
-FILTERS = 8
-BATCH_SIZE = 32
+FILTERS = 16
+BATCH_SIZE = 16
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
