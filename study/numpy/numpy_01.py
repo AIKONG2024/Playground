@@ -17,6 +17,15 @@ print(np_a[-1][-1]) #7
 print(np_a[2,]) #[5 6 7]
 print(np.sum(np_a)) #33 행렬의 모든 원소 더함 
 
+'''
+print(a[0][1]) #2
+print(np_a[0][1]) #2
+print(a[-1][-1]) #7
+print(np_a[-1][-1]) #7
+print(np_a[2,]) #[5 6 7]
+print(np.sum(np_a)) #33 행렬의 모든 원소 더함 
+'''
+
 #list comprebasion(루프)
 
 comprebasion = np.array(range(i, i+3) for i in [1,4,7])
