@@ -77,45 +77,45 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # '''
 
 ########################################
-# RandomSearch
-import numpy as np
-import pandas as pd
-from sklearn.datasets import load_wine
-from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.metrics import accuracy_score
+# # RandomSearch
+# import numpy as np
+# import pandas as pd
+# from sklearn.datasets import load_wine
+# from sklearn.svm import SVC
+# from sklearn.model_selection import train_test_split, RandomizedSearchCV
+# from sklearn.metrics import accuracy_score
 
-#데이터
-X, y = load_wine(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+# #데이터
+# X, y = load_wine(return_X_y=True)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-#모델구성
-model = SVC() #parameters = kernel , C, gamma, degree, max_iter
+# #모델구성
+# model = SVC() #parameters = kernel , C, gamma, degree, max_iter
 
-parameters = {'kernel' : ['linear','rbf','poly','sigmoid'],
-              'C' : [1,3,5,10],
-              'degree' : [5, 10, 15, 20],
-              'max_iter' : [1, 5, 10 ,15, 20]}
-gscv = RandomizedSearchCV(estimator=model, param_distributions= parameters, cv= 5, n_jobs= -1)
+# parameters = {'kernel' : ['linear','rbf','poly','sigmoid'],
+#               'C' : [1,3,5,10],
+#               'degree' : [5, 10, 15, 20],
+#               'max_iter' : [1, 5, 10 ,15, 20]}
+# gscv = RandomizedSearchCV(estimator=model, param_distributions= parameters, cv= 5, n_jobs= -1)
 
-#훈련
-gscv.fit(X_train, y_train)
+# #훈련
+# gscv.fit(X_train, y_train)
 
-#평가 예측
-best_model = gscv.best_estimator_
-best_param = gscv.best_params_
-predict = np.round(best_model.predict(X_test))
-acc_score = accuracy_score(y_test, predict)
-print(f'''
-    best parameters : {best_param}
-    {type(model).__name__} predict is [{predict}]
-    accuracy score is [{ acc_score}]"
-    ''')
-'''
-    best parameters : {'max_iter': 1, 'kernel': 'linear', 'degree': 15, 'C': 5}
-    SVC predict is [[0 2 2 1 2 0 0 1 2 2 1 1 0 2 0 1 1 2 2 0 1 2 0 0 2 1 0 1 2 2 0 2 1 1 2 2]]
-    accuracy score is [0.6944444444444444]"
-'''
+# #평가 예측
+# best_model = gscv.best_estimator_
+# best_param = gscv.best_params_
+# predict = np.round(best_model.predict(X_test))
+# acc_score = accuracy_score(y_test, predict)
+# print(f'''
+#     best parameters : {best_param}
+#     {type(model).__name__} predict is [{predict}]
+#     accuracy score is [{ acc_score}]"
+#     ''')
+# '''
+#     best parameters : {'max_iter': 1, 'kernel': 'linear', 'degree': 15, 'C': 5}
+#     SVC predict is [[0 2 2 1 2 0 0 1 2 2 1 1 0 2 0 1 1 2 2 0 1 2 0 0 2 1 0 1 2 2 0 2 1 1 2 2]]
+#     accuracy score is [0.6944444444444444]"
+# '''
 
 ########################################
 # Hyperopt
