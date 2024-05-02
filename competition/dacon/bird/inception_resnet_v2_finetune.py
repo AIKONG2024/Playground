@@ -11,7 +11,12 @@ from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import math
-
+def combined_generator(gen1, gen2):
+    while True:
+        for x1, y1 in gen1:
+            yield x1, y1
+            x2, y2 = next(gen2)
+            yield x2, y2
 # Set random seed for reproducibility
 SEED = 42
 IMAGE_SIZE = (224,224)
@@ -23,6 +28,7 @@ tf.random.set_seed(SEED)
 data_path = "./" 
 train_df = pd.read_csv(data_path + "train.csv")
 test_df = pd.read_csv(data_path + "test.csv")
+
 
 lbe = LabelEncoder()
 lbe.fit_transform(train_df['label'])
@@ -59,9 +65,27 @@ train_generator = train_datagen.flow_from_dataframe(
     class_mode='categorical'
 )
 
+upscale_train_generator = train_datagen.flow_from_dataframe(
+    dataframe=train_df,
+    x_col='upscale_img_path',
+    y_col='label',
+    target_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode='categorical'
+)
+
 val_generator = val_datagen.flow_from_dataframe(
     dataframe=val_df,
     x_col='img_path',
+    y_col='label',
+    target_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode='categorical'
+)
+
+upscale_val_generator = train_datagen.flow_from_dataframe(
+    dataframe=train_df,
+    x_col='upscale_img_path',
     y_col='label',
     target_size=IMAGE_SIZE,
     batch_size=BATCH_SIZE,
@@ -115,16 +139,20 @@ def build_model(num_classes):
 num_classes = num_classes = len(train_generator.class_indices)
 model = build_model(num_classes)
 model.summary()
-model.compile(optimizer=Adam(0.0001),
+model.compile(optimizer=Adam(0.001),
               loss='categorical_crossentropy',
               metrics=['accuracy', f1])
 lrate = LearningRateScheduler(step_decay)
+
+train_generator = combined_generator(train_generator, upscale_train_generator)
+val_generator = combined_generator(val_generator, upscale_val_generator)
+
 history = model.fit(
     train_generator,
-    steps_per_epoch=len(train_generator),
+    steps_per_epoch=len(train_df) // BATCH_SIZE,
     epochs=300,
     validation_data=val_generator,
-    validation_steps=len(val_generator),
+    validation_steps=len(test_df) // BATCH_SIZE,
     callbacks=[EarlyStopping(monitor='val_f1', mode='max', patience=20, restore_best_weights=True)]
 )
 
