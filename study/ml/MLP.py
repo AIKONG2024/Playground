@@ -43,20 +43,20 @@ print(f'''
     ''')
 ##########################################################
 
-# import numpy as np
-# from sklearn.svm import SVC
-# from sklearn.metrics import accuracy_score
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
 
-# x = np.array([[0,0], [0,1], [1,0], [1,1]])
-# y = np.array([0, 1, 1, 0])
-# for _ in range(0,20):
-#     model = SVC(kernel='rbf', C=1)
+x = np.array([[0,0], [0,1], [1,0], [1,1]])
+y = np.array([0, 1, 1, 0])
+for _ in range(0,20):
+    model = SVC(kernel='rbf', C=1)
 
-#     model.fit(x, y)
-#     predict = model.predict(x)
-#     acc_score = accuracy_score(y, predict)
-#     print(f'''
-#         {type(model).__name__} predict is [{predict}]
-#         accuracy score is [{ acc_score}]"
-#         ''')
+    model.fit(x, y)
+    predict = model.predict(x)
+    acc_score = accuracy_score(y, predict)
+    print(f'''
+        {type(model).__name__} predict is [{predict}]
+        accuracy score is [{ acc_score}]"
+        ''')
 

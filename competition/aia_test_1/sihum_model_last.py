@@ -58,7 +58,7 @@ amore_csv = pd.read_csv(path + "아모레 240205.csv", encoding='cp949', thousan
 # ===========================================================================
 # 데이터 일자 이후 자르기
 samsung_csv = samsung_csv[samsung_csv.index > "2018/08/30"]
-amore_csv = amore_csv[amore_csv.index > "2018/05/06"][:1338]
+amore_csv = amore_csv[amore_csv.index > "2020/03/12"][:1338]
 
 print(samsung_csv.columns)
 # ['시가', '고가', '저가', '종가', '전일비', 'Unnamed: 6', '등락률', '거래량', '금액(백만)',
