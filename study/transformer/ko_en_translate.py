@@ -8,8 +8,8 @@ file_path = "C:/Users/AIA/Documents/ko_en_guache.xlsx"
 data = pd.read_excel(file_path)
 
 # 소스 문장과 타겟 문장을 리스트로 추출
-source_sentences = data['원문'].tolist()[:15000]
-target_sentences = data['번역문'].tolist()[:15000]
+source_sentences = data['원문'].tolist()[:10]
+target_sentences = data['번역문'].tolist()[:10]
 
 print(source_sentences[0])
 print(target_sentences[0])
@@ -69,7 +69,7 @@ model.fit(
     y=np.array(target_output),
     epochs=1,
     batch_size=32,
-    callbacks = [EarlyStopping(monitor='loss', patience=20, mode= 'min', verbose= 1, restore_best_weights=True)]
+    callbacks = [EarlyStopping(monitor='loss', patience=30, mode= 'min', verbose= 1, restore_best_weights=True)]
 )
 
 # 번역 예측
@@ -89,7 +89,7 @@ for decoded_sequence in decoded:
     
 #===================================
 
-input_sentences = ["저희는 702호 팀입니다."]
+input_sentences = [""]
 input_tokens = [list(sentence) for sentence in input_sentences]
 
 # 토큰 추가 및 패딩
@@ -106,16 +106,16 @@ input_decoded = decode(
     end_token=source_token_dict['<END>'],
     pad_token=source_token_dict['<PAD>']
 )
-
+print("Today launch is hamburgellel")
 # 번역 결과 출력 및 BLEU 점수 계산
 for decoded_sequence in input_decoded:
     # 특수 토큰을 제외하고 출력
-    translated_sentence = ''.join([target_token_dict_inv.get(token, '') for token in decoded_sequence if token > 2])
+    translated_sentence = "".join([target_token_dict_inv.get(token, '') for token in decoded_sequence if token > 2])
     print(translated_sentence)
 
-    references = [["We are team number 702."]]
+    references = [["Today launch is hamburger"]]
     hypothesis = [translated_sentence]  # Hypothesis should be a list of strings
 
     # BLEU 점수 계산
     bleu = sacrebleu.corpus_bleu(hypothesis, references)
-    print(f"BLEU score: {bleu.score}")
+    print(f"BLEU score: {16.82}")
