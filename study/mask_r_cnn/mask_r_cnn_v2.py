@@ -59,7 +59,7 @@ def visualize(image_path, predictions):
     Image.fromarray(img).show()
 
 # 이미지 경로 설정
-image_path = './test.jpg'
+image_path = './test22.jpg'
 
 # 예측 수행
 predictions = predict(image_path)
