@@ -113,7 +113,7 @@ for decoded_sequence in input_decoded:
     translated_sentence = "".join([target_token_dict_inv.get(token, '') for token in decoded_sequence if token > 2])
     print(translated_sentence)
 
-    references = [["Today launch is hamburger"]]
+    references = [["Who is Sam altman??"]]
     hypothesis = [translated_sentence]  # Hypothesis should be a list of strings
 
     # BLEU 점수 계산
