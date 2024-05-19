@@ -118,4 +118,3 @@ for decoded_sequence in input_decoded:
 
     # BLEU 점수 계산
     bleu = sacrebleu.corpus_bleu(hypothesis, references)
-    print(f"BLEU score: {16.82}")
