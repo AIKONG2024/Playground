@@ -60,7 +60,7 @@ def visualize(image_path, predictions):
 
 
 # 이미지 경로 설정
-image_path = './horse_person.jpg'
+image_path = './raw_data.png'
 
 # 예측 수행
 predictions = predict(image_path)
