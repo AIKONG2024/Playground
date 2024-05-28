@@ -18,3 +18,5 @@ catboost_info/
 keras_tuner/
 
 *.h5
+
+.env
