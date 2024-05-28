@@ -12,7 +12,7 @@ response = openai.ChatCompletion.create(
   model="gpt-3.5-turbo",
   messages=[
     {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "강남 비트캠프 학원 알아?"}
+    {"role": "user", "content": "샘 알트먼은 누구인가요? 그의 경력과 업적에 대해 알려주세요."}
   ]
 )
 
